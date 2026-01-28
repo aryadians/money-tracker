@@ -10,6 +10,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use App\Exports\TransactionsExport;
+use Maatwebsite\Excel\Facades\Excel;
 
 class TransactionController extends Controller
 {
@@ -175,5 +177,12 @@ class TransactionController extends Controller
         });
 
         return redirect()->back()->with('message', 'Transaksi berhasil dihapus!');
+    }
+    public function export(Request $request)
+    {
+        $month = $request->input('month', date('m'));
+        $year = $request->input('year', date('Y'));
+
+        return Excel::download(new TransactionsExport($month, $year), 'Laporan-Keuangan-' . $month . '-' . $year . '.xlsx');
     }
 }
