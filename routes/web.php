@@ -6,6 +6,7 @@ use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\TransactionController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
+use App\Http\Controllers\TransferController;
 
 /*
 |--------------------------------------------------------------------------
@@ -31,6 +32,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // A. Dashboard
     Route::get('/dashboard', [WalletController::class, 'index'])->name('dashboard');
+    Route::post('/transfers', [TransferController::class, 'store'])->name('transfers.store');
 
     // B. Manajemen Dompet (Wallets)
     Route::post('/wallets', [WalletController::class, 'store'])->name('wallets.store');       // Simpan Baru
