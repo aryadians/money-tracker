@@ -1,30 +1,25 @@
-import { forwardRef, useEffect, useImperativeHandle, useRef } from 'react';
+import { forwardRef, useEffect, useRef } from 'react';
 
-export default forwardRef(function TextInput(
-    { type = 'text', className = '', isFocused = false, ...props },
-    ref,
-) {
+export default forwardRef(function TextInput({ type = 'text', className = '', isFocused = false, ...props }, ref) {
     const localRef = useRef(null);
-
-    useImperativeHandle(ref, () => ({
-        focus: () => localRef.current?.focus(),
-    }));
+    const inputRef = ref ? ref : localRef;
 
     useEffect(() => {
         if (isFocused) {
-            localRef.current?.focus();
+            inputRef.current.focus();
         }
-    }, [isFocused]);
+    }, []);
 
     return (
         <input
             {...props}
             type={type}
             className={
-                'rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 ' +
+                // UBAH DISINI: Style Dark Mode (bg-gray-900, text-white, border-gray-700)
+                'border-gray-700 bg-gray-900 text-white focus:border-blue-500 focus:ring-blue-500 rounded-xl shadow-sm ' +
                 className
             }
-            ref={localRef}
+            ref={inputRef}
         />
     );
 });
