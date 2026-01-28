@@ -5,7 +5,8 @@ use App\Http\Controllers\WalletController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
-
+use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\TransactionController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -31,6 +32,10 @@ Route::get('/', function () {
 Route::get('/dashboard', [WalletController::class, 'index'])
     ->middleware(['auth', 'verified'])
     ->name('dashboard');
+// --- TAMBAHKAN INI ---
+Route::post('/wallets', [WalletController::class, 'store'])
+    ->middleware(['auth', 'verified'])
+    ->name('wallets.store');
 
 // --- 3. PROFIL USER ---
 // Grup rute untuk edit profil, ganti password, hapus akun.
@@ -38,6 +43,12 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+    Route::post('/categories', [CategoryController::class, 'store'])
+        ->middleware(['auth', 'verified'])
+        ->name('categories.store');
+    Route::post('/transactions', [TransactionController::class, 'store'])
+    ->middleware(['auth', 'verified'])
+    ->name('transactions.store');
 });
 
 // --- 4. AUTENTIKASI ---

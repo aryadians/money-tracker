@@ -1,12 +1,22 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
+import CreateWalletModal from '@/Pages/Wallets/Partials/CreateWalletModal';
+import CreateTransactionModal from '@/Pages/Transactions/Partials/CreateTransactionModal';
 import { Head } from '@inertiajs/react';
 import { useState } from 'react';
 
-export default function Dashboard({ auth, wallets, totalBalance }) {
+export default function Dashboard({ auth, wallets, categories, totalBalance }) {
 
+    // --- 1. STATE MANAGEMENT ---
+    // Mengatur buka-tutup modal
+    const [showCreateWallet, setShowCreateWallet] = useState(false);
+    const [showCreateTransaction, setShowCreateTransaction] = useState(false);
+
+    // --- 2. DATA PROCESSING ---
+    // Pastikan data array aman (mencegah error jika null)
     const safeWallets = Array.isArray(wallets) ? wallets : [];
+    const safeCategories = Array.isArray(categories) ? categories : [];
 
-    // Format Rupiah
+    // Helper: Format Rupiah
     const formatRupiah = (number) => {
         return new Intl.NumberFormat('id-ID', {
             style: 'currency',
@@ -16,14 +26,14 @@ export default function Dashboard({ auth, wallets, totalBalance }) {
         }).format(number);
     };
 
-    // Greeting berdasarkan waktu
+    // Helper: Ucapan Selamat (Pagi/Siang/Malam)
     const hour = new Date().getHours();
     const greeting = hour < 12 ? 'Selamat Pagi' : hour < 18 ? 'Selamat Sore' : 'Selamat Malam';
 
     return (
         <AuthenticatedLayout
             user={auth.user}
-            // Kita kosongkan header default agar tidak merusak estetika dark mode
+            // Kosongkan header default agar tidak merusak estetika dark mode
             header={null}
         >
             <Head title="Dashboard" />
@@ -31,7 +41,7 @@ export default function Dashboard({ auth, wallets, totalBalance }) {
             {/* --- MAIN CONTAINER (DARK MODE & ANIMATED BG) --- */}
             <div className="min-h-screen bg-gray-900 text-white relative overflow-hidden">
 
-                {/* Background Blobs Animation (Sama seperti Login) */}
+                {/* Background Blobs Animation */}
                 <div className="absolute top-0 left-0 w-full h-full overflow-hidden z-0 pointer-events-none">
                     <div className="absolute top-[-10%] left-[-10%] w-96 h-96 bg-purple-600 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob"></div>
                     <div className="absolute top-[20%] right-[-10%] w-96 h-96 bg-blue-600 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-2000"></div>
@@ -48,8 +58,13 @@ export default function Dashboard({ auth, wallets, totalBalance }) {
                                 {greeting}, {auth.user.name.split(' ')[0]}! 👋
                             </h1>
                         </div>
-                        <button className="mt-4 md:mt-0 px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 rounded-xl font-bold shadow-lg shadow-blue-500/30 transform hover:-translate-y-1 transition-all duration-300">
-                            + Transaksi Baru
+
+                        {/* TOMBOL TRANSAKSI BARU */}
+                        <button
+                            onClick={() => setShowCreateTransaction(true)}
+                            className="mt-4 md:mt-0 px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 rounded-xl font-bold shadow-lg shadow-blue-500/30 transform hover:-translate-y-1 transition-all duration-300 flex items-center gap-2"
+                        >
+                            <span>📝</span> Transaksi Baru
                         </button>
                     </div>
 
@@ -65,7 +80,7 @@ export default function Dashboard({ auth, wallets, totalBalance }) {
                                     {formatRupiah(totalBalance || 0)}
                                 </div>
                                 <div className="flex items-center mt-4 text-green-400 text-sm font-medium bg-green-400/10 px-3 py-1 rounded-full w-fit">
-                                    <span>↗ +12.5% bulan ini</span>
+                                    <span>↗ Data Real-time</span>
                                 </div>
                             </div>
                             <div className="hidden md:block opacity-20">
@@ -83,18 +98,21 @@ export default function Dashboard({ auth, wallets, totalBalance }) {
                         <button className="text-sm text-blue-400 hover:text-blue-300 hover:underline">Lihat Semua</button>
                     </div>
 
-                    {/* Grid Layout */}
+                    {/* Grid Layout Dompet */}
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
 
-                        {/* Add New Wallet Card (Dashed) */}
-                        <div className="group border-2 border-dashed border-gray-700 rounded-2xl flex flex-col items-center justify-center p-6 cursor-pointer hover:border-blue-500 hover:bg-gray-800/30 transition-all duration-300 min-h-[200px]">
+                        {/* KARTU TAMBAH DOMPET (DASHED) */}
+                        <div
+                            onClick={() => setShowCreateWallet(true)}
+                            className="group border-2 border-dashed border-gray-700 rounded-2xl flex flex-col items-center justify-center p-6 cursor-pointer hover:border-blue-500 hover:bg-gray-800/30 transition-all duration-300 min-h-[200px]"
+                        >
                             <div className="w-12 h-12 rounded-full bg-gray-800 group-hover:bg-blue-600 flex items-center justify-center transition-colors duration-300 mb-3">
                                 <span className="text-2xl text-gray-400 group-hover:text-white">+</span>
                             </div>
                             <p className="text-gray-500 group-hover:text-white font-medium">Tambah Dompet</p>
                         </div>
 
-                        {/* Wallet Cards */}
+                        {/* MAPPING DATA DOMPET */}
                         {safeWallets.map((wallet) => (
                             <div
                                 key={wallet.id}
@@ -110,7 +128,7 @@ export default function Dashboard({ auth, wallets, totalBalance }) {
                                     <div className="flex justify-between items-start">
                                         <div className="p-3 rounded-xl bg-gray-900/50 border border-white/10 shadow-inner">
                                             <span className="text-2xl">
-                                                {wallet.type === 'cash' ? '💵' : wallet.type === 'bank' ? '🏦' : '💳'}
+                                                {wallet.type === 'cash' ? '💵' : wallet.type === 'bank' ? '🏦' : wallet.type === 'ewallet' ? '📱' : '💳'}
                                             </span>
                                         </div>
                                         <span className="px-3 py-1 text-xs font-bold uppercase tracking-wider text-gray-400 bg-gray-900/50 rounded-full border border-white/5">
@@ -129,7 +147,7 @@ export default function Dashboard({ auth, wallets, totalBalance }) {
                         ))}
                     </div>
 
-                    {/* --- RECENT TRANSACTIONS (Placeholder Table) --- */}
+                    {/* --- RECENT TRANSACTIONS (Placeholder) --- */}
                     <div className="mt-12">
                         <h2 className="text-2xl font-bold text-white mb-6">Transaksi Terakhir</h2>
                         <div className="bg-gray-800/40 backdrop-blur-md rounded-2xl border border-white/5 p-8 text-center">
@@ -141,7 +159,23 @@ export default function Dashboard({ auth, wallets, totalBalance }) {
                 </div>
             </div>
 
-            {/* --- CSS STYLE TAMBAHAN --- */}
+            {/* --- MODAL SECTION (Diletakkan di luar kontainer utama agar overlay benar) --- */}
+
+            {/* Modal Tambah Dompet */}
+            <CreateWalletModal
+                show={showCreateWallet}
+                onClose={() => setShowCreateWallet(false)}
+            />
+
+            {/* Modal Tambah Transaksi */}
+            <CreateTransactionModal
+                show={showCreateTransaction}
+                onClose={() => setShowCreateTransaction(false)}
+                wallets={safeWallets}
+                categories={safeCategories}
+            />
+
+            {/* CSS Animation */}
             <style>{`
                 @keyframes blob {
                     0% { transform: translate(0px, 0px) scale(1); }
@@ -153,8 +187,8 @@ export default function Dashboard({ auth, wallets, totalBalance }) {
                     100% { transform: translateX(100%); }
                 }
                 .animate-blob { animation: blob 7s infinite; }
-                .animation-delay-2000 { animation-delay: 2s; }
-                .animation-delay-4000 { animation-delay: 4s; }
+                .animate-blob.animation-delay-2000 { animation-delay: 2s; }
+                .animate-blob.animation-delay-4000 { animation-delay: 4s; }
                 .animate-shimmer { animation: shimmer 2s infinite; }
             `}</style>
         </AuthenticatedLayout>
