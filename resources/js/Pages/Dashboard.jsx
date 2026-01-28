@@ -2,10 +2,11 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import CreateWalletModal from '@/Pages/Wallets/Partials/CreateWalletModal';
 import CreateTransactionModal from '@/Pages/Transactions/Partials/CreateTransactionModal';
 import CreateCategoryModal from '@/Pages/Categories/Partials/CreateCategoryModal';
-import { Head, Link } from '@inertiajs/react'; // Pastikan Link diimport
+import { Head, Link } from '@inertiajs/react';
 import { useState } from 'react';
 
-export default function Dashboard({ auth, wallets, categories, transactions, totalBalance }) {
+// Pastikan menerima prop 'transactions' dari controller
+export default function Dashboard({ auth, wallets, categories, transactions, totalBalance, monthlyIncome, monthlyExpense }) {
 
     // --- 1. STATE MANAGEMENT ---
     const [showCreateWallet, setShowCreateWallet] = useState(false);
@@ -59,7 +60,7 @@ export default function Dashboard({ auth, wallets, categories, transactions, tot
                 <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
 
                     {/* --- HEADER --- */}
-                    <div className="flex flex-col md:flex-row justify-between items-end mb-10">
+                    <div className="flex flex-col md:flex-row justify-between items-end mb-8">
                         <div>
                             <p className="text-gray-400 text-sm font-medium tracking-wider uppercase mb-1">Overview</p>
                             <h1 className="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-400">
@@ -84,21 +85,35 @@ export default function Dashboard({ auth, wallets, categories, transactions, tot
                         </div>
                     </div>
 
-                    {/* --- TOTAL BALANCE --- */}
-                    <div className="w-full p-8 mb-10 rounded-3xl bg-gradient-to-br from-gray-800/50 to-gray-900/50 backdrop-blur-xl border border-white/10 shadow-2xl relative overflow-hidden group">
-                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full group-hover:animate-shimmer"></div>
-                        <div className="relative z-10 flex flex-col md:flex-row justify-between items-center">
-                            <div>
-                                <h3 className="text-gray-400 font-medium mb-2">Total Kekayaan Bersih</h3>
-                                <div className="text-5xl md:text-6xl font-bold tracking-tight text-white drop-shadow-lg">
-                                    {formatRupiah(totalBalance || 0)}
-                                </div>
-                                <div className="flex items-center mt-4 text-green-400 text-sm font-medium bg-green-400/10 px-3 py-1 rounded-full w-fit">
-                                    <span>↗ Data Real-time</span>
+                    {/* --- TOTAL BALANCE & SUMMARY --- */}
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-10">
+                        {/* Kartu Total Saldo */}
+                        <div className="lg:col-span-2 p-8 rounded-3xl bg-gradient-to-br from-gray-800/50 to-gray-900/50 backdrop-blur-xl border border-white/10 shadow-2xl relative overflow-hidden group flex flex-col justify-center">
+                            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full group-hover:animate-shimmer"></div>
+                            <h3 className="text-gray-400 font-medium mb-2">Total Kekayaan Bersih</h3>
+                            <div className="text-5xl md:text-6xl font-bold tracking-tight text-white drop-shadow-lg">
+                                {formatRupiah(totalBalance || 0)}
+                            </div>
+                            <div className="hidden md:block absolute right-8 bottom-8 opacity-20">
+                                <span className="text-8xl">💰</span>
+                            </div>
+                        </div>
+
+                        {/* Kartu Ringkasan Pemasukan & Pengeluaran */}
+                        <div className="flex flex-col gap-4">
+                            <div className="flex-1 p-5 rounded-2xl bg-green-900/20 border border-green-500/20 backdrop-blur-sm flex items-center gap-4">
+                                <div className="w-12 h-12 rounded-full bg-green-500/20 flex items-center justify-center text-2xl">⬇️</div>
+                                <div>
+                                    <p className="text-green-400 text-xs uppercase font-bold tracking-wider">Pemasukan</p>
+                                    <p className="text-2xl font-bold text-white">{formatRupiah(monthlyIncome || 0)}</p>
                                 </div>
                             </div>
-                            <div className="hidden md:block opacity-20">
-                                <span className="text-8xl">💰</span>
+                            <div className="flex-1 p-5 rounded-2xl bg-red-900/20 border border-red-500/20 backdrop-blur-sm flex items-center gap-4">
+                                <div className="w-12 h-12 rounded-full bg-red-500/20 flex items-center justify-center text-2xl">⬆️</div>
+                                <div>
+                                    <p className="text-red-400 text-xs uppercase font-bold tracking-wider">Pengeluaran</p>
+                                    <p className="text-2xl font-bold text-white">{formatRupiah(monthlyExpense || 0)}</p>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -106,11 +121,10 @@ export default function Dashboard({ auth, wallets, categories, transactions, tot
                     {/* --- WALLETS SECTION --- */}
                     <div className="flex justify-between items-center mb-6">
                         <h2 className="text-2xl font-bold text-white">Dompet Saya</h2>
-                        {/* Link ini opsional, bisa diarahkan ke halaman detail dompet jika ada */}
                         <button className="text-sm text-blue-400 hover:text-blue-300 hover:underline">Lihat Semua</button>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-10">
 
                         {/* KARTU TAMBAH DOMPET */}
                         <div
@@ -118,7 +132,7 @@ export default function Dashboard({ auth, wallets, categories, transactions, tot
                                 setEditingWallet(null);
                                 setShowCreateWallet(true);
                             }}
-                            className="group border-2 border-dashed border-gray-700 rounded-2xl flex flex-col items-center justify-center p-6 cursor-pointer hover:border-blue-500 hover:bg-gray-800/30 transition-all duration-300 min-h-[200px]"
+                            className="group border-2 border-dashed border-gray-700 rounded-2xl flex flex-col items-center justify-center p-6 cursor-pointer hover:border-blue-500 hover:bg-gray-800/30 transition-all duration-300 min-h-[160px]"
                         >
                             <div className="w-12 h-12 rounded-full bg-gray-800 group-hover:bg-blue-600 flex items-center justify-center transition-colors duration-300 mb-3">
                                 <span className="text-2xl text-gray-400 group-hover:text-white">+</span>
@@ -154,21 +168,21 @@ export default function Dashboard({ auth, wallets, categories, transactions, tot
                                     <span className="text-xs">✏️</span>
                                 </button>
 
-                                <div className="relative z-10 flex flex-col h-full justify-between min-h-[140px]">
+                                <div className="relative z-10 flex flex-col h-full justify-between min-h-[120px]">
                                     <div className="flex justify-between items-start">
-                                        <div className="p-3 rounded-xl bg-gray-900/50 border border-white/10 shadow-inner backdrop-blur-sm">
-                                            <span className="text-2xl">
+                                        <div className="p-2 rounded-xl bg-gray-900/50 border border-white/10 shadow-inner backdrop-blur-sm">
+                                            <span className="text-xl">
                                                 {wallet.type === 'cash' ? '💵' : wallet.type === 'bank' ? '🏦' : wallet.type === 'ewallet' ? '📱' : '💳'}
                                             </span>
                                         </div>
-                                        <span className="px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-gray-300 bg-black/20 rounded-full border border-white/5">
+                                        <span className="px-2 py-1 text-[10px] font-bold uppercase tracking-widest text-gray-300 bg-black/20 rounded-full border border-white/5">
                                             {wallet.type}
                                         </span>
                                     </div>
 
                                     <div>
-                                        <h4 className="text-lg font-semibold text-gray-200 mb-1 group-hover:text-white transition-colors truncate pr-8">{wallet.name}</h4>
-                                        <p className="text-2xl font-bold text-white tracking-wide">
+                                        <h4 className="text-base font-semibold text-gray-200 mb-1 group-hover:text-white transition-colors truncate pr-8">{wallet.name}</h4>
+                                        <p className="text-xl font-bold text-white tracking-wide">
                                             {formatRupiah(wallet.balance)}
                                         </p>
                                     </div>
