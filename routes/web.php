@@ -36,6 +36,15 @@ Route::get('/dashboard', [WalletController::class, 'index'])
 Route::post('/wallets', [WalletController::class, 'store'])
     ->middleware(['auth', 'verified'])
     ->name('wallets.store');
+// Route untuk Update Dompet
+Route::patch('/wallets/{wallet}', [WalletController::class, 'update'])
+    ->middleware(['auth', 'verified'])
+    ->name('wallets.update');
+
+// Route Delete (Opsional, buat jaga-jaga kalau mau hapus nanti)
+Route::delete('/wallets/{wallet}', [WalletController::class, 'destroy'])
+    ->middleware(['auth', 'verified'])
+    ->name('wallets.destroy');
 
 // --- 3. PROFIL USER ---
 // Grup rute untuk edit profil, ganti password, hapus akun.

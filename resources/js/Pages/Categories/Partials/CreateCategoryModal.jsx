@@ -2,18 +2,17 @@ import { useForm } from '@inertiajs/react';
 import Modal from '@/Components/Modal';
 import InputLabel from '@/Components/InputLabel';
 import TextInput from '@/Components/TextInput';
-import { CATEGORY_ICONS } from '@/Constants/Icons'; // Import ikon 🍔 ⛽
+import { CATEGORY_ICONS } from '@/Constants/Icons';
 
 export default function CreateCategoryModal({ show, onClose }) {
     const { data, setData, post, processing, reset, errors } = useForm({
         name: '',
         type: 'expense',
-        icon: '🍔', // Default icon
+        icon: '📝', // Default icon
     });
 
     const submit = (e) => {
         e.preventDefault();
-        // Pastikan route ini nanti kita buat
         post(route('categories.store'), {
             onSuccess: () => {
                 reset();
@@ -25,75 +24,92 @@ export default function CreateCategoryModal({ show, onClose }) {
     return (
         <Modal show={show} onClose={onClose}>
             <div className="p-6 bg-gray-900 text-white border border-white/10">
-                <h2 className="text-xl font-bold mb-6 text-white">Tambah Kategori Baru</h2>
+                <div className="flex justify-between items-center mb-6">
+                    <h2 className="text-lg font-bold">Tambah Kategori</h2>
+                    <button onClick={onClose} className="text-gray-400 hover:text-white">✕</button>
+                </div>
 
-                <form onSubmit={submit} className="space-y-6">
+                <form onSubmit={submit} className="space-y-5">
 
-                    {/* Pilihan Tipe (Pemasukan / Pengeluaran) */}
-                    <div className="flex bg-gray-800 p-1 rounded-xl">
+                    {/* Switch Type (Pengeluaran / Pemasukan) */}
+                    <div className="flex bg-gray-800 p-1 rounded-lg">
                         <button
                             type="button"
                             onClick={() => setData('type', 'expense')}
-                            className={`flex-1 py-2 rounded-lg text-sm font-bold transition-all ${data.type === 'expense' ? 'bg-red-500 text-white shadow-lg' : 'text-gray-400 hover:text-white'
+                            className={`flex-1 py-2 text-xs font-bold uppercase tracking-wider rounded-md transition-all ${data.type === 'expense' ? 'bg-red-500 text-white shadow' : 'text-gray-400 hover:text-white'
                                 }`}
                         >
-                            Pengeluaran 💸
+                            Pengeluaran
                         </button>
                         <button
                             type="button"
                             onClick={() => setData('type', 'income')}
-                            className={`flex-1 py-2 rounded-lg text-sm font-bold transition-all ${data.type === 'income' ? 'bg-green-500 text-white shadow-lg' : 'text-gray-400 hover:text-white'
+                            className={`flex-1 py-2 text-xs font-bold uppercase tracking-wider rounded-md transition-all ${data.type === 'income' ? 'bg-green-500 text-white shadow' : 'text-gray-400 hover:text-white'
                                 }`}
                         >
-                            Pemasukan 💰
+                            Pemasukan
                         </button>
                     </div>
 
-                    {/* Input Nama */}
+                    {/* Input Nama & Preview Icon */}
                     <div>
-                        <InputLabel htmlFor="cat_name" value="Nama Kategori" />
-                        <TextInput
-                            id="cat_name"
-                            value={data.name}
-                            onChange={(e) => setData('name', e.target.value)}
-                            className="mt-1 block w-full bg-gray-800 border-gray-600"
-                            placeholder={data.type === 'expense' ? "Contoh: Bensin Pertamax" : "Contoh: Bonus Tahunan"}
-                        />
+                        <InputLabel value="Nama Kategori" className="mb-1" />
+                        <div className="flex gap-3">
+                            {/* Kotak Preview Icon */}
+                            <div className="w-12 h-11 flex items-center justify-center bg-gray-800 border border-gray-600 rounded-lg text-2xl animate-bounce-short">
+                                {data.icon}
+                            </div>
+                            {/* Input Nama */}
+                            <TextInput
+                                value={data.name}
+                                onChange={(e) => setData('name', e.target.value)}
+                                className="block w-full bg-gray-800 border-gray-600 text-sm focus:border-blue-500 focus:ring-blue-500"
+                                placeholder={data.type === 'expense' ? "Contoh: Jajan Sore" : "Contoh: Jual Barang Bekas"}
+                            />
+                        </div>
                     </div>
 
-                    {/* GRID ICON (Bagian Penting!) */}
+                    {/* GRID ICON (FIXED) */}
                     <div>
-                        <InputLabel value="Pilih Ikon" className="mb-3" />
-                        <div className="grid grid-cols-5 gap-3 max-h-48 overflow-y-auto pr-2 custom-scrollbar">
+                        <InputLabel value="Pilih Ikon" className="mb-2 text-xs text-gray-400 uppercase tracking-wider" />
+                        <div className="grid grid-cols-6 sm:grid-cols-8 gap-2 max-h-60 overflow-y-auto pr-1 custom-scrollbar">
                             {CATEGORY_ICONS.map((item) => (
                                 <div
                                     key={item.id}
                                     onClick={() => {
-                                        setData('icon', item.icon);
-                                        // Auto-fill nama jika masih kosong
-                                        if (data.name === '') setData('name', item.label);
+                                        // FIX: Langsung update Icon DAN Nama sekaligus tanpa syarat
+                                        setData(prevData => ({
+                                            ...prevData,
+                                            icon: item.icon,
+                                            name: item.label
+                                        }));
                                     }}
-                                    className={`aspect-square flex flex-col items-center justify-center rounded-xl cursor-pointer transition-all border ${data.icon === item.icon
-                                            ? 'bg-blue-600/20 border-blue-500 shadow-[0_0_10px_rgba(59,130,246,0.5)] scale-110'
-                                            : 'bg-gray-800 border-transparent hover:bg-gray-700'
+                                    className={`aspect-square flex items-center justify-center rounded-lg cursor-pointer transition-all border ${data.icon === item.icon
+                                            ? 'bg-blue-600/30 border-blue-500 shadow-sm scale-110'
+                                            : 'bg-gray-800/50 border-transparent hover:bg-gray-700 hover:border-gray-600'
                                         }`}
+                                    title={item.label}
                                 >
-                                    <span className="text-2xl drop-shadow-md">{item.icon}</span>
+                                    <span className="text-xl">{item.icon}</span>
                                 </div>
                             ))}
                         </div>
                     </div>
 
                     {/* Tombol Simpan */}
-                    <div className="mt-6 flex justify-end gap-3">
-                        <button type="button" onClick={onClose} className="px-5 py-2 bg-gray-700 rounded-xl hover:bg-gray-600">
-                            Batal
-                        </button>
-                        <button disabled={processing} className="px-5 py-2 bg-blue-600 rounded-xl font-bold hover:bg-blue-500 shadow-lg">
+                    <div className="flex justify-end pt-2">
+                        <button disabled={processing} className="w-full py-3 bg-blue-600 hover:bg-blue-500 rounded-xl font-bold text-sm shadow-lg transition-all active:scale-95">
                             Simpan Kategori
                         </button>
                     </div>
                 </form>
+
+                {/* Style Tambahan untuk Scrollbar */}
+                <style>{`
+                    .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+                    .custom-scrollbar::-webkit-scrollbar-track { background: #1f2937; }
+                    .custom-scrollbar::-webkit-scrollbar-thumb { background: #4b5563; border-radius: 4px; }
+                `}</style>
             </div>
         </Modal>
     );
