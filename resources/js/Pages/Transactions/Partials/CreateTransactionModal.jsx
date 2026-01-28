@@ -2,10 +2,12 @@ import { useForm } from '@inertiajs/react';
 import Modal from '@/Components/Modal';
 import InputLabel from '@/Components/InputLabel';
 import TextInput from '@/Components/TextInput';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
-export default function CreateTransactionModal({ show, onClose, wallets, categories, onCreateCategory }) {
-    const { data, setData, post, processing, reset, errors } = useForm({
+// Tambah prop 'transactionToEdit'
+export default function CreateTransactionModal({ show, onClose, wallets, categories, onCreateCategory, transactionToEdit = null }) {
+
+    const { data, setData, post, processing, reset, errors, clearErrors } = useForm({
         wallet_id: '',
         category_id: '',
         amount: '',
@@ -13,10 +15,36 @@ export default function CreateTransactionModal({ show, onClose, wallets, categor
         type: 'expense',
         notes: '',
         receipt: null,
+        _method: 'POST', // Default POST
     });
 
     const [previewImage, setPreviewImage] = useState(null);
+
+    // Filter kategori sesuai tipe
     const filteredCategories = categories.filter(c => c.type === data.type);
+
+    // --- EFFECT: ISI DATA SAAT EDIT ---
+    useEffect(() => {
+        if (transactionToEdit) {
+            setData({
+                wallet_id: transactionToEdit.wallet_id,
+                category_id: transactionToEdit.category_id,
+                amount: transactionToEdit.amount,
+                date: transactionToEdit.transaction_date,
+                type: transactionToEdit.type,
+                notes: transactionToEdit.description || '',
+                receipt: null, // Reset file input
+                _method: 'PATCH', // Penting untuk Update dengan File
+            });
+            // Jika ada gambar lama, tampilkan (Opsional: Butuh URL lengkap dari backend)
+            setPreviewImage(transactionToEdit.receipt_image ? `/storage/${transactionToEdit.receipt_image}` : null);
+        } else {
+            reset();
+            setPreviewImage(null);
+            setData('_method', 'POST');
+        }
+        clearErrors();
+    }, [transactionToEdit, show]);
 
     const handleImageChange = (e) => {
         const file = e.target.files[0];
@@ -26,22 +54,30 @@ export default function CreateTransactionModal({ show, onClose, wallets, categor
 
     const submit = (e) => {
         e.preventDefault();
-        post(route('transactions.store'), {
-            onSuccess: () => {
-                reset();
-                setPreviewImage(null);
-                onClose();
-            },
-        });
+
+        if (transactionToEdit) {
+            // MODE EDIT (Gunakan POST dengan _method: PATCH agar file terkirim)
+            post(route('transactions.update', transactionToEdit.id), {
+                onSuccess: () => onClose(),
+            });
+        } else {
+            // MODE CREATE
+            post(route('transactions.store'), {
+                onSuccess: () => {
+                    reset();
+                    setPreviewImage(null);
+                    onClose();
+                },
+            });
+        }
     };
 
     return (
         <Modal show={show} onClose={onClose}>
             <div className="p-5 bg-gray-900 text-white border border-white/10 max-h-[90vh] overflow-y-auto custom-scrollbar">
 
-                {/* Header dengan Close Button */}
+                {/* Header */}
                 <div className="flex justify-between items-center mb-4">
-                    {/* Switch Type */}
                     <div className="flex bg-gray-800 p-1 rounded-lg">
                         <button
                             type="button"
@@ -65,7 +101,7 @@ export default function CreateTransactionModal({ show, onClose, wallets, categor
 
                 <form onSubmit={submit} className="space-y-5">
 
-                    {/* INPUT NOMINAL (CLEAN & BIG) */}
+                    {/* Input Nominal */}
                     <div>
                         <InputLabel value="Nominal" className="text-xs text-gray-400 mb-1" />
                         <div className="relative">
@@ -81,7 +117,7 @@ export default function CreateTransactionModal({ show, onClose, wallets, categor
                         </div>
                     </div>
 
-                    {/* PILIH DOMPET (Compact) */}
+                    {/* Pilih Dompet */}
                     <div>
                         <InputLabel value="Sumber Dana" className="text-xs text-gray-400 mb-1" />
                         <div className="flex gap-2 overflow-x-auto pb-2 custom-scrollbar">
@@ -101,7 +137,7 @@ export default function CreateTransactionModal({ show, onClose, wallets, categor
                         </div>
                     </div>
 
-                    {/* PILIH KATEGORI (Grid Kecil Rapi) */}
+                    {/* Pilih Kategori */}
                     <div>
                         <div className="flex justify-between items-center mb-1">
                             <InputLabel value="Kategori" className="text-xs text-gray-400" />
@@ -129,7 +165,7 @@ export default function CreateTransactionModal({ show, onClose, wallets, categor
                         </div>
                     </div>
 
-                    {/* INPUT LAINNYA */}
+                    {/* Input Tanggal & Foto */}
                     <div className="grid grid-cols-2 gap-3">
                         <div>
                             <InputLabel value="Tanggal" className="text-xs text-gray-400 mb-1" />
@@ -160,17 +196,12 @@ export default function CreateTransactionModal({ show, onClose, wallets, categor
                     />
 
                     <button disabled={processing} className="w-full py-3 bg-gradient-to-r from-green-500 to-emerald-600 rounded-xl font-bold text-white shadow-lg transition-transform active:scale-95">
-                        Simpan Transaksi
+                        {transactionToEdit ? 'Update Perubahan' : 'Simpan Transaksi'}
                     </button>
                 </form>
 
-                {/* CSS CSS CSS: Hilangkan Spinner Input Number */}
                 <style>{`
-                    input[type=number]::-webkit-inner-spin-button, 
-                    input[type=number]::-webkit-outer-spin-button { 
-                        -webkit-appearance: none; margin: 0; 
-                    }
-                    /* Custom Scrollbar */
+                    input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
                     .custom-scrollbar::-webkit-scrollbar { width: 4px; height: 4px; }
                     .custom-scrollbar::-webkit-scrollbar-track { background: #1f2937; }
                     .custom-scrollbar::-webkit-scrollbar-thumb { background: #4b5563; border-radius: 4px; }

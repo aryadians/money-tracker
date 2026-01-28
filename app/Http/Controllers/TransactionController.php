@@ -5,9 +5,10 @@ namespace App\Http\Controllers;
 use Inertia\Inertia;
 use App\Models\Transaction;
 use App\Models\Wallet;
+use App\Models\Category; // <--- INI YANG TADI KURANG
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB; // Penting untuk transaksi database aman
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
 class TransactionController extends Controller
@@ -23,20 +24,31 @@ class TransactionController extends Controller
         $month = $request->input('month', date('m'));
         $year = $request->input('year', date('Y'));
 
+        // 1. Ambil Data Transaksi (Filter & Pagination)
         $transactions = Transaction::where('user_id', $user->id)
             ->with(['category', 'wallet']) // Load relasi
             ->whereMonth('transaction_date', $month)
             ->whereYear('transaction_date', $year)
             ->latest('transaction_date')
-            ->paginate(10) // Tampilkan 10 per halaman
-            ->withQueryString(); // Agar filter tetap ada saat pindah halaman
+            ->paginate(10)
+            ->withQueryString();
+
+        // 2. Ambil Data Dompet (Untuk Modal Edit di halaman Index)
+        $wallets = Wallet::where('user_id', $user->id)->get();
+
+        // 3. Ambil Data Kategori (Untuk Modal Edit di halaman Index)
+        $categories = Category::where('user_id', $user->id)
+            ->orWhereNull('user_id')
+            ->get();
 
         return Inertia::render('Transactions/Index', [
             'transactions' => $transactions,
             'filters' => [
                 'month' => $month,
                 'year' => $year,
-            ]
+            ],
+            'wallets' => $wallets,       // Kirim ke Frontend
+            'categories' => $categories, // Kirim ke Frontend
         ]);
     }
 
@@ -55,10 +67,8 @@ class TransactionController extends Controller
             'notes' => 'nullable|string',
         ]);
 
-        // Gunakan DB::transaction agar jika satu gagal, semua batal (saldo aman)
         DB::transaction(function () use ($request) {
-
-            // 1. Upload Gambar (Jika ada)
+            // 1. Upload Gambar
             $path = null;
             if ($request->hasFile('receipt')) {
                 $path = $request->file('receipt')->store('receipts', 'public');
@@ -78,8 +88,6 @@ class TransactionController extends Controller
 
             // 3. Update Saldo Dompet
             $wallet = Wallet::find($request->wallet_id);
-
-            // Cek apakah dompet milik user yang sama (Security Check)
             if ($wallet->user_id !== Auth::id()) abort(403);
 
             if ($request->type === 'expense') {
@@ -93,12 +101,10 @@ class TransactionController extends Controller
     }
 
     /**
-     * Mengupdate transaksi yang sudah ada.
-     * (Logic saldo harus dibalik dulu, baru di-apply yang baru)
+     * Mengupdate transaksi.
      */
     public function update(Request $request, Transaction $transaction)
     {
-        // Security Check
         if ($transaction->user_id !== Auth::id()) abort(403);
 
         $request->validate([
@@ -111,15 +117,15 @@ class TransactionController extends Controller
         ]);
 
         DB::transaction(function () use ($request, $transaction) {
-            // 1. KEMBALIKAN SALDO LAMA (Revert Old Transaction)
+            // 1. Revert Saldo Lama
             $oldWallet = Wallet::find($transaction->wallet_id);
             if ($transaction->type === 'expense') {
-                $oldWallet->increment('balance', $transaction->amount); // Uang dikembalikan
+                $oldWallet->increment('balance', $transaction->amount);
             } else {
-                $oldWallet->decrement('balance', $transaction->amount); // Uang ditarik kembali
+                $oldWallet->decrement('balance', $transaction->amount);
             }
 
-            // 2. UPDATE DATA TRANSAKSI
+            // 2. Update Data
             $transaction->update([
                 'wallet_id' => $request->wallet_id,
                 'category_id' => $request->category_id,
@@ -129,7 +135,7 @@ class TransactionController extends Controller
                 'description' => $request->notes,
             ]);
 
-            // 3. TERAPKAN SALDO BARU (Apply New Transaction)
+            // 3. Apply Saldo Baru
             $newWallet = Wallet::find($request->wallet_id);
             if ($request->type === 'expense') {
                 $newWallet->decrement('balance', $request->amount);
@@ -146,28 +152,25 @@ class TransactionController extends Controller
      */
     public function destroy(Transaction $transaction)
     {
-        // Security Check
         if ($transaction->user_id !== Auth::id()) abort(403);
 
         DB::transaction(function () use ($transaction) {
-            // 1. KEMBALIKAN SALDO DOMPET
+            // 1. Kembalikan Saldo
             $wallet = Wallet::find($transaction->wallet_id);
-
-            // Jika wallet masih ada (belum dihapus user)
             if ($wallet) {
                 if ($transaction->type === 'expense') {
-                    $wallet->increment('balance', $transaction->amount); // Kembalikan uang belanja
+                    $wallet->increment('balance', $transaction->amount);
                 } else {
-                    $wallet->decrement('balance', $transaction->amount); // Tarik kembali uang pemasukan
+                    $wallet->decrement('balance', $transaction->amount);
                 }
             }
 
-            // 2. HAPUS FILE FOTO (Jika ada)
+            // 2. Hapus File Foto
             if ($transaction->receipt_image) {
                 Storage::disk('public')->delete($transaction->receipt_image);
             }
 
-            // 3. HAPUS DATA
+            // 3. Hapus Data
             $transaction->delete();
         });
 
