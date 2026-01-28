@@ -5,19 +5,21 @@ import CreateCategoryModal from '@/Pages/Categories/Partials/CreateCategoryModal
 import { Head } from '@inertiajs/react';
 import { useState } from 'react';
 
-export default function Dashboard({ auth, wallets, categories, totalBalance }) {
+// Pastikan menerima prop 'transactions' dari controller
+export default function Dashboard({ auth, wallets, categories, transactions, totalBalance }) {
 
     // --- 1. STATE MANAGEMENT ---
     const [showCreateWallet, setShowCreateWallet] = useState(false);
     const [showCreateTransaction, setShowCreateTransaction] = useState(false);
     const [showCreateCategory, setShowCreateCategory] = useState(false);
 
-    // State Baru: Menyimpan data dompet yang sedang diedit
+    // State untuk Edit Dompet
     const [editingWallet, setEditingWallet] = useState(null);
 
     // --- 2. DATA PROCESSING ---
     const safeWallets = Array.isArray(wallets) ? wallets : [];
     const safeCategories = Array.isArray(categories) ? categories : [];
+    const safeTransactions = Array.isArray(transactions) ? transactions : []; // Safety check data transaksi
 
     // Helper: Format Rupiah
     const formatRupiah = (number) => {
@@ -29,7 +31,12 @@ export default function Dashboard({ auth, wallets, categories, totalBalance }) {
         }).format(number);
     };
 
-    // Helper: Ucapan Selamat
+    // Helper: Format Tanggal (Contoh: 28 Jan 2026)
+    const formatDate = (dateString) => {
+        const options = { day: 'numeric', month: 'short', year: 'numeric' };
+        return new Date(dateString).toLocaleDateString('id-ID', options);
+    };
+
     const hour = new Date().getHours();
     const greeting = hour < 12 ? 'Selamat Pagi' : hour < 18 ? 'Selamat Sore' : 'Selamat Malam';
 
@@ -40,7 +47,7 @@ export default function Dashboard({ auth, wallets, categories, totalBalance }) {
         >
             <Head title="Dashboard" />
 
-            {/* --- MAIN CONTAINER (DARK MODE) --- */}
+            {/* --- MAIN CONTAINER --- */}
             <div className="min-h-screen bg-gray-900 text-white relative overflow-hidden">
 
                 {/* Background Blobs */}
@@ -62,7 +69,6 @@ export default function Dashboard({ auth, wallets, categories, totalBalance }) {
                         </div>
 
                         <div className="flex gap-3 mt-4 md:mt-0">
-                            {/* Tombol Kategori */}
                             <button
                                 onClick={() => setShowCreateCategory(true)}
                                 className="px-4 py-3 bg-gray-800 hover:bg-gray-700 text-gray-300 rounded-xl font-bold shadow-lg transition-all flex items-center gap-2 border border-gray-700"
@@ -70,7 +76,6 @@ export default function Dashboard({ auth, wallets, categories, totalBalance }) {
                                 <span>📂</span> Kategori
                             </button>
 
-                            {/* Tombol Transaksi */}
                             <button
                                 onClick={() => setShowCreateTransaction(true)}
                                 className="px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 rounded-xl font-bold shadow-lg shadow-blue-500/30 transform hover:-translate-y-1 transition-all duration-300 flex items-center gap-2"
@@ -80,7 +85,7 @@ export default function Dashboard({ auth, wallets, categories, totalBalance }) {
                         </div>
                     </div>
 
-                    {/* --- TOTAL BALANCE CARD --- */}
+                    {/* --- TOTAL BALANCE --- */}
                     <div className="w-full p-8 mb-10 rounded-3xl bg-gradient-to-br from-gray-800/50 to-gray-900/50 backdrop-blur-xl border border-white/10 shadow-2xl relative overflow-hidden group">
                         <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full group-hover:animate-shimmer"></div>
                         <div className="relative z-10 flex flex-col md:flex-row justify-between items-center">
@@ -105,13 +110,12 @@ export default function Dashboard({ auth, wallets, categories, totalBalance }) {
                         <button className="text-sm text-blue-400 hover:text-blue-300 hover:underline">Lihat Semua</button>
                     </div>
 
-                    {/* GRID DOMPET */}
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
 
-                        {/* KARTU TAMBAH DOMPET (Mode Create) */}
+                        {/* KARTU TAMBAH DOMPET */}
                         <div
                             onClick={() => {
-                                setEditingWallet(null); // Reset mode ke Create
+                                setEditingWallet(null);
                                 setShowCreateWallet(true);
                             }}
                             className="group border-2 border-dashed border-gray-700 rounded-2xl flex flex-col items-center justify-center p-6 cursor-pointer hover:border-blue-500 hover:bg-gray-800/30 transition-all duration-300 min-h-[200px]"
@@ -122,23 +126,22 @@ export default function Dashboard({ auth, wallets, categories, totalBalance }) {
                             <p className="text-gray-500 group-hover:text-white font-medium">Tambah Dompet</p>
                         </div>
 
-                        {/* LOOPING DOMPET (Mode Edit saat diklik/hover) */}
+                        {/* LIST DOMPET */}
                         {safeWallets.map((wallet) => (
                             <div
                                 key={wallet.id}
                                 className="relative group p-6 rounded-2xl bg-gray-800/40 backdrop-blur-md border border-white/5 hover:border-white/20 transition-all duration-500 hover:shadow-[0_0_30px_rgba(59,130,246,0.15)] overflow-hidden transform hover:-translate-y-2 cursor-pointer"
                                 onClick={() => {
-                                    setEditingWallet(wallet); // Set data dompet yg mau diedit
-                                    setShowCreateWallet(true); // Buka modal
+                                    setEditingWallet(wallet);
+                                    setShowCreateWallet(true);
                                 }}
                             >
-                                {/* Background Gradient */}
                                 <div
                                     className="absolute inset-0 opacity-0 group-hover:opacity-20 transition-opacity duration-500"
                                     style={{ background: `linear-gradient(135deg, ${wallet.color_hex || '#3B82F6'}, transparent)` }}
                                 ></div>
 
-                                {/* TOMBOL EDIT (PENCIL) - PINDAH KE POJOK KANAN BAWAH */}
+                                {/* TOMBOL EDIT (FIXED POSITION: BOTTOM RIGHT) */}
                                 <button
                                     onClick={(e) => {
                                         e.stopPropagation();
@@ -151,7 +154,6 @@ export default function Dashboard({ auth, wallets, categories, totalBalance }) {
                                     <span className="text-xs">✏️</span>
                                 </button>
 
-                                {/* Konten Kartu */}
                                 <div className="relative z-10 flex flex-col h-full justify-between min-h-[140px]">
                                     <div className="flex justify-between items-start">
                                         <div className="p-3 rounded-xl bg-gray-900/50 border border-white/10 shadow-inner backdrop-blur-sm">
@@ -159,7 +161,6 @@ export default function Dashboard({ auth, wallets, categories, totalBalance }) {
                                                 {wallet.type === 'cash' ? '💵' : wallet.type === 'bank' ? '🏦' : wallet.type === 'ewallet' ? '📱' : '💳'}
                                             </span>
                                         </div>
-                                        {/* Badge Tipe di Kanan Atas */}
                                         <span className="px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-gray-300 bg-black/20 rounded-full border border-white/5">
                                             {wallet.type}
                                         </span>
@@ -176,57 +177,100 @@ export default function Dashboard({ auth, wallets, categories, totalBalance }) {
                         ))}
                     </div>
 
-                    {/* --- RECENT TRANSACTIONS (Placeholder) --- */}
+                    {/* --- TRANSAKSI TERAKHIR (LOGIC FIX) --- */}
                     <div className="mt-12">
-                        <h2 className="text-2xl font-bold text-white mb-6">Transaksi Terakhir</h2>
-                        <div className="bg-gray-800/40 backdrop-blur-md rounded-2xl border border-white/5 p-8 text-center">
-                            <p className="text-gray-500">Belum ada transaksi bulan ini.</p>
-                            <p className="text-sm text-gray-600 mt-2">Mulai catat pengeluaranmu sekarang!</p>
+                        <div className="flex justify-between items-center mb-6">
+                            <h2 className="text-2xl font-bold text-white">Transaksi Terakhir</h2>
+                            <button className="text-sm text-blue-400 hover:text-blue-300 hover:underline">Lihat Semua</button>
+                        </div>
+
+                        <div className="bg-gray-800/40 backdrop-blur-md rounded-3xl border border-white/5 overflow-hidden">
+                            {/* Cek apakah ada transaksi */}
+                            {safeTransactions.length > 0 ? (
+                                <div className="divide-y divide-gray-700/50">
+                                    {safeTransactions.map((trx) => (
+                                        <div key={trx.id} className="p-5 flex items-center justify-between hover:bg-white/5 transition-colors group cursor-pointer">
+
+                                            {/* Kiri: Ikon & Info */}
+                                            <div className="flex items-center gap-4">
+                                                <div className={`w-12 h-12 rounded-2xl flex items-center justify-center text-2xl border border-white/5 shadow-inner ${trx.type === 'expense' ? 'bg-red-500/10 text-red-500' : 'bg-green-500/10 text-green-500'
+                                                    }`}>
+                                                    {/* Pakai icon kategori jika ada */}
+                                                    {trx.category ? trx.category.icon_name : (trx.type === 'expense' ? '💸' : '💰')}
+                                                </div>
+                                                <div>
+                                                    <h4 className="font-bold text-white text-base">
+                                                        {trx.category ? trx.category.name : 'Tanpa Kategori'}
+                                                    </h4>
+                                                    <div className="flex items-center gap-2 text-xs text-gray-400 mt-1">
+                                                        <span>{formatDate(trx.transaction_date)}</span>
+                                                        <span>•</span>
+                                                        <span className="flex items-center gap-1">
+                                                            <span className="w-2 h-2 rounded-full" style={{ backgroundColor: trx.wallet?.color_hex || '#ccc' }}></span>
+                                                            {trx.wallet?.name || 'Dompet Dihapus'}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            {/* Kanan: Nominal */}
+                                            <div className="text-right">
+                                                <p className={`text-lg font-bold tracking-wide ${trx.type === 'expense' ? 'text-red-400' : 'text-green-400'
+                                                    }`}>
+                                                    {trx.type === 'expense' ? '-' : '+'} {formatRupiah(trx.amount)}
+                                                </p>
+                                                {trx.description && (
+                                                    <p className="text-xs text-gray-500 max-w-[150px] truncate ml-auto">
+                                                        {trx.description}
+                                                    </p>
+                                                )}
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            ) : (
+                                /* TAMPILAN JIKA BELUM ADA TRANSAKSI */
+                                <div className="p-10 text-center">
+                                    <div className="w-16 h-16 bg-gray-700/50 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl">
+                                        📝
+                                    </div>
+                                    <p className="text-gray-400 font-medium">Belum ada transaksi bulan ini.</p>
+                                    <p className="text-sm text-gray-600 mt-2">Yuk mulai catat pengeluaranmu!</p>
+                                    <button
+                                        onClick={() => setShowCreateTransaction(true)}
+                                        className="mt-4 text-blue-400 hover:text-blue-300 text-sm font-bold"
+                                    >
+                                        + Tambah Transaksi
+                                    </button>
+                                </div>
+                            )}
                         </div>
                     </div>
 
                 </div>
             </div>
 
-            {/* --- MODAL SECTION --- */}
-
-            {/* 1. Modal Tambah/Edit Dompet */}
+            {/* --- MODALS --- */}
             <CreateWalletModal
                 show={showCreateWallet}
-                onClose={() => {
-                    setShowCreateWallet(false);
-                    setTimeout(() => setEditingWallet(null), 300); // Reset data edit setelah tutup
-                }}
-                walletToEdit={editingWallet} // <--- Kirim data edit ke modal
+                onClose={() => { setShowCreateWallet(false); setTimeout(() => setEditingWallet(null), 300); }}
+                walletToEdit={editingWallet}
             />
-
-            {/* 2. Modal Tambah Kategori */}
             <CreateCategoryModal
                 show={showCreateCategory}
                 onClose={() => setShowCreateCategory(false)}
             />
-
-            {/* 3. Modal Tambah Transaksi */}
             <CreateTransactionModal
                 show={showCreateTransaction}
                 onClose={() => setShowCreateTransaction(false)}
                 wallets={safeWallets}
                 categories={safeCategories}
-                // Fitur Spesial: Buka Modal Kategori dari dalam Modal Transaksi
-                onCreateCategory={() => {
-                    setShowCreateTransaction(false);
-                    setTimeout(() => setShowCreateCategory(true), 200);
-                }}
+                onCreateCategory={() => { setShowCreateTransaction(false); setTimeout(() => setShowCreateCategory(true), 200); }}
             />
 
-            {/* Global CSS */}
+            {/* Style Animasi */}
             <style>{`
-                @keyframes blob {
-                    0% { transform: translate(0px, 0px) scale(1); }
-                    33% { transform: translate(30px, -50px) scale(1.1); }
-                    66% { transform: translate(-20px, 20px) scale(0.9); }
-                    100% { transform: translate(0px, 0px) scale(1); }
-                }
+                @keyframes blob { 0% { transform: translate(0px, 0px) scale(1); } 33% { transform: translate(30px, -50px) scale(1.1); } 66% { transform: translate(-20px, 20px) scale(0.9); } 100% { transform: translate(0px, 0px) scale(1); } }
                 @keyframes shimmer { 100% { transform: translateX(100%); } }
                 .animate-blob { animation: blob 7s infinite; }
                 .animate-shimmer { animation: shimmer 2s infinite; }

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Transaction;
 use App\Models\Wallet; // <--- PASTIKAN BARIS INI ADA!
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -14,17 +15,26 @@ class WalletController extends Controller
     {
         $user = Auth::user();
 
-        // Ambil Dompet
+        // 1. Ambil Dompet
         $wallets = Wallet::where('user_id', $user->id)->get();
 
-        // Ambil Kategori (Pisahkan Income & Expense biar rapi)
+        // 2. Ambil Kategori
         $categories = Category::where('user_id', $user->id)
-            ->orWhereNull('user_id') // Ambil kategori global juga
+            ->orWhereNull('user_id')
+            ->get();
+
+        // 3. AMBIL TRANSAKSI TERAKHIR (Ini yang baru)
+        // Kita ambil 5 transaksi terakhir, lengkap dengan info kategori & dompetnya
+        $transactions = Transaction::where('user_id', $user->id)
+            ->with(['category', 'wallet']) // Load relasi biar bisa ambil icon & nama dompet
+            ->latest('transaction_date')   // Urutkan dari yang terbaru
+            ->take(5)                      // Ambil 5 saja
             ->get();
 
         return Inertia::render('Dashboard', [
             'wallets' => $wallets,
-            'categories' => $categories, // <--- Kirim ke frontend
+            'categories' => $categories,
+            'transactions' => $transactions, // <--- Kirim ke Frontend
             'totalBalance' => $wallets->sum('balance'),
         ]);
     }
