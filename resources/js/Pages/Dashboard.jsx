@@ -2,10 +2,9 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import CreateWalletModal from '@/Pages/Wallets/Partials/CreateWalletModal';
 import CreateTransactionModal from '@/Pages/Transactions/Partials/CreateTransactionModal';
 import CreateCategoryModal from '@/Pages/Categories/Partials/CreateCategoryModal';
-import { Head } from '@inertiajs/react';
+import { Head, Link } from '@inertiajs/react'; // Pastikan Link diimport
 import { useState } from 'react';
 
-// Pastikan menerima prop 'transactions' dari controller
 export default function Dashboard({ auth, wallets, categories, transactions, totalBalance }) {
 
     // --- 1. STATE MANAGEMENT ---
@@ -19,7 +18,7 @@ export default function Dashboard({ auth, wallets, categories, transactions, tot
     // --- 2. DATA PROCESSING ---
     const safeWallets = Array.isArray(wallets) ? wallets : [];
     const safeCategories = Array.isArray(categories) ? categories : [];
-    const safeTransactions = Array.isArray(transactions) ? transactions : []; // Safety check data transaksi
+    const safeTransactions = Array.isArray(transactions) ? transactions : [];
 
     // Helper: Format Rupiah
     const formatRupiah = (number) => {
@@ -31,7 +30,7 @@ export default function Dashboard({ auth, wallets, categories, transactions, tot
         }).format(number);
     };
 
-    // Helper: Format Tanggal (Contoh: 28 Jan 2026)
+    // Helper: Format Tanggal (PENTING: Ini yang sebelumnya hilang)
     const formatDate = (dateString) => {
         const options = { day: 'numeric', month: 'short', year: 'numeric' };
         return new Date(dateString).toLocaleDateString('id-ID', options);
@@ -107,6 +106,7 @@ export default function Dashboard({ auth, wallets, categories, transactions, tot
                     {/* --- WALLETS SECTION --- */}
                     <div className="flex justify-between items-center mb-6">
                         <h2 className="text-2xl font-bold text-white">Dompet Saya</h2>
+                        {/* Link ini opsional, bisa diarahkan ke halaman detail dompet jika ada */}
                         <button className="text-sm text-blue-400 hover:text-blue-300 hover:underline">Lihat Semua</button>
                     </div>
 
@@ -177,15 +177,17 @@ export default function Dashboard({ auth, wallets, categories, transactions, tot
                         ))}
                     </div>
 
-                    {/* --- TRANSAKSI TERAKHIR (LOGIC FIX) --- */}
+                    {/* --- TRANSAKSI TERAKHIR --- */}
                     <div className="mt-12">
                         <div className="flex justify-between items-center mb-6">
                             <h2 className="text-2xl font-bold text-white">Transaksi Terakhir</h2>
-                            <button className="text-sm text-blue-400 hover:text-blue-300 hover:underline">Lihat Semua</button>
+                            {/* FIX: Ubah jadi Link agar berfungsi */}
+                            <Link href={route('transactions.index')} className="text-sm text-blue-400 hover:text-blue-300 hover:underline">
+                                Lihat Semua
+                            </Link>
                         </div>
 
                         <div className="bg-gray-800/40 backdrop-blur-md rounded-3xl border border-white/5 overflow-hidden">
-                            {/* Cek apakah ada transaksi */}
                             {safeTransactions.length > 0 ? (
                                 <div className="divide-y divide-gray-700/50">
                                     {safeTransactions.map((trx) => (
@@ -195,7 +197,6 @@ export default function Dashboard({ auth, wallets, categories, transactions, tot
                                             <div className="flex items-center gap-4">
                                                 <div className={`w-12 h-12 rounded-2xl flex items-center justify-center text-2xl border border-white/5 shadow-inner ${trx.type === 'expense' ? 'bg-red-500/10 text-red-500' : 'bg-green-500/10 text-green-500'
                                                     }`}>
-                                                    {/* Pakai icon kategori jika ada */}
                                                     {trx.category ? trx.category.icon_name : (trx.type === 'expense' ? '💸' : '💰')}
                                                 </div>
                                                 <div>
@@ -229,7 +230,7 @@ export default function Dashboard({ auth, wallets, categories, transactions, tot
                                     ))}
                                 </div>
                             ) : (
-                                /* TAMPILAN JIKA BELUM ADA TRANSAKSI */
+                                /* Empty State */
                                 <div className="p-10 text-center">
                                     <div className="w-16 h-16 bg-gray-700/50 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl">
                                         📝

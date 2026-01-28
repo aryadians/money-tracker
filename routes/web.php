@@ -2,11 +2,11 @@
 
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\WalletController;
-use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\Auth;
-use Inertia\Inertia;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\TransactionController;
+use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Auth;
+
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -17,8 +17,7 @@ use App\Http\Controllers\TransactionController;
 */
 
 // --- 1. HALAMAN UTAMA (ROOT) ---
-// Logika: Cek apakah user sudah login?
-// Jika YA -> Masuk Dashboard. Jika TIDAK -> Masuk halaman Login.
+// Cek login: Jika sudah login -> Dashboard, Jika belum -> Login page.
 Route::get('/', function () {
     if (Auth::check()) {
         return redirect()->route('dashboard');
@@ -26,40 +25,30 @@ Route::get('/', function () {
     return redirect()->route('login');
 });
 
-// --- 2. DASHBOARD ---
-// Rute ini hanya bisa diakses jika sudah login ('auth').
-// Memanggil fungsi 'index' di WalletController untuk mengambil data dompet.
-Route::get('/dashboard', [WalletController::class, 'index'])
-    ->middleware(['auth', 'verified'])
-    ->name('dashboard');
-// --- TAMBAHKAN INI ---
-Route::post('/wallets', [WalletController::class, 'store'])
-    ->middleware(['auth', 'verified'])
-    ->name('wallets.store');
-// Route untuk Update Dompet
-Route::patch('/wallets/{wallet}', [WalletController::class, 'update'])
-    ->middleware(['auth', 'verified'])
-    ->name('wallets.update');
+// --- 2. FITUR UTAMA APLIKASI (PROTECTED ROUTES) ---
+// Semua route di dalam grup ini WAJIB Login & Email Verified
+Route::middleware(['auth', 'verified'])->group(function () {
 
-// Route Delete (Opsional, buat jaga-jaga kalau mau hapus nanti)
-Route::delete('/wallets/{wallet}', [WalletController::class, 'destroy'])
-    ->middleware(['auth', 'verified'])
-    ->name('wallets.destroy');
+    // A. Dashboard
+    Route::get('/dashboard', [WalletController::class, 'index'])->name('dashboard');
 
-// --- 3. PROFIL USER ---
-// Grup rute untuk edit profil, ganti password, hapus akun.
-Route::middleware('auth')->group(function () {
+    // B. Manajemen Dompet (Wallets)
+    Route::post('/wallets', [WalletController::class, 'store'])->name('wallets.store');       // Simpan Baru
+    Route::patch('/wallets/{wallet}', [WalletController::class, 'update'])->name('wallets.update'); // Update
+    Route::delete('/wallets/{wallet}', [WalletController::class, 'destroy'])->name('wallets.destroy'); // Hapus
+
+    // C. Manajemen Kategori (Categories)
+    Route::post('/categories', [CategoryController::class, 'store'])->name('categories.store'); // Simpan Baru
+
+    // D. Manajemen Transaksi (Transactions)
+    Route::get('/transactions', [TransactionController::class, 'index'])->name('transactions.index'); // Lihat Riwayat Lengkap
+    Route::post('/transactions', [TransactionController::class, 'store'])->name('transactions.store'); // Simpan Transaksi Baru
+
+    // E. Profil User
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
-    Route::post('/categories', [CategoryController::class, 'store'])
-        ->middleware(['auth', 'verified'])
-        ->name('categories.store');
-    Route::post('/transactions', [TransactionController::class, 'store'])
-    ->middleware(['auth', 'verified'])
-    ->name('transactions.store');
 });
 
-// --- 4. AUTENTIKASI ---
-// Memuat rute untuk login, register, reset password, dll.
+// --- 3. AUTENTIKASI ---
 require __DIR__ . '/auth.php';
