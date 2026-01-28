@@ -1,27 +1,45 @@
 <?php
 
 use App\Http\Controllers\ProfileController;
-use Illuminate\Foundation\Application;
+use App\Http\Controllers\WalletController;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 
+/*
+|--------------------------------------------------------------------------
+| Web Routes
+|--------------------------------------------------------------------------
+|
+| Di sini kita mendaftarkan rute web untuk aplikasi.
+|
+*/
+
+// --- 1. HALAMAN UTAMA (ROOT) ---
+// Logika: Cek apakah user sudah login?
+// Jika YA -> Masuk Dashboard. Jika TIDAK -> Masuk halaman Login.
 Route::get('/', function () {
-    return Inertia::render('Welcome', [
-        'canLogin' => Route::has('login'),
-        'canRegister' => Route::has('register'),
-        'laravelVersion' => Application::VERSION,
-        'phpVersion' => PHP_VERSION,
-    ]);
+    if (Auth::check()) {
+        return redirect()->route('dashboard');
+    }
+    return redirect()->route('login');
 });
 
-Route::get('/dashboard', function () {
-    return Inertia::render('Dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
+// --- 2. DASHBOARD ---
+// Rute ini hanya bisa diakses jika sudah login ('auth').
+// Memanggil fungsi 'index' di WalletController untuk mengambil data dompet.
+Route::get('/dashboard', [WalletController::class, 'index'])
+    ->middleware(['auth', 'verified'])
+    ->name('dashboard');
 
+// --- 3. PROFIL USER ---
+// Grup rute untuk edit profil, ganti password, hapus akun.
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-require __DIR__.'/auth.php';
+// --- 4. AUTENTIKASI ---
+// Memuat rute untuk login, register, reset password, dll.
+require __DIR__ . '/auth.php';

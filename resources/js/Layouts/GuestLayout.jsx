@@ -1,4 +1,3 @@
-import ApplicationLogo from '@/Components/ApplicationLogo';
 import { Link } from '@inertiajs/react';
 
 export default function GuestLayout({ children }) {
@@ -6,7 +5,15 @@ export default function GuestLayout({ children }) {
         <div className="flex min-h-screen flex-col items-center bg-gray-100 pt-6 sm:justify-center sm:pt-0">
             <div>
                 <Link href="/">
-                    <ApplicationLogo className="h-20 w-20 fill-current text-gray-500" />
+                    {/* FIX: Kita ganti <ApplicationLogo /> dengan Teks/Icon langsung.
+                        Ini mencegah error "White Screen" jika file logo bermasalah.
+                    */}
+                    <div className="flex flex-col items-center">
+                        <span className="text-4xl">💸</span>
+                        <h1 className="text-2xl font-bold text-gray-800 mt-2 tracking-wider">
+                            MONEY TRACKER
+                        </h1>
+                    </div>
                 </Link>
             </div>
 
