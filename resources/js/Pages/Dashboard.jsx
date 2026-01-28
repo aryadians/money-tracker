@@ -1,14 +1,12 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head } from '@inertiajs/react';
+import { useState } from 'react';
 
-export default function Dashboard({ auth, wallets, totalBalance, error }) {
+export default function Dashboard({ auth, wallets, totalBalance }) {
 
-    // --- 1. LOGIC & SAFETY CHECK ---
-    // Kita pastikan 'wallets' adalah array. Jika null/error, kita ganti jadi array kosong []
-    // Ini mencegah error "map is not a function" yang bikin layar putih.
     const safeWallets = Array.isArray(wallets) ? wallets : [];
 
-    // Fungsi untuk memformat angka menjadi format Rupiah (Contoh: 15000 -> Rp 15.000)
+    // Format Rupiah
     const formatRupiah = (number) => {
         return new Intl.NumberFormat('id-ID', {
             style: 'currency',
@@ -18,108 +16,147 @@ export default function Dashboard({ auth, wallets, totalBalance, error }) {
         }).format(number);
     };
 
-    // --- 2. TAMPILAN (JSX) ---
+    // Greeting berdasarkan waktu
+    const hour = new Date().getHours();
+    const greeting = hour < 12 ? 'Selamat Pagi' : hour < 18 ? 'Selamat Sore' : 'Selamat Malam';
+
     return (
         <AuthenticatedLayout
             user={auth.user}
-            header={<h2 className="font-semibold text-xl text-gray-800 leading-tight">Dashboard</h2>}
+            // Kita kosongkan header default agar tidak merusak estetika dark mode
+            header={null}
         >
             <Head title="Dashboard" />
 
-            <div className="py-12">
-                <div className="max-w-7xl mx-auto sm:px-6 lg:px-8">
+            {/* --- MAIN CONTAINER (DARK MODE & ANIMATED BG) --- */}
+            <div className="min-h-screen bg-gray-900 text-white relative overflow-hidden">
 
-                    {/* A. ERROR MESSAGE (Hanya muncul jika ada error dari backend) */}
-                    {error && (
-                        <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-6" role="alert">
-                            <p className="font-bold">Gagal Memuat Data</p>
-                            <p>{error}</p>
+                {/* Background Blobs Animation (Sama seperti Login) */}
+                <div className="absolute top-0 left-0 w-full h-full overflow-hidden z-0 pointer-events-none">
+                    <div className="absolute top-[-10%] left-[-10%] w-96 h-96 bg-purple-600 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob"></div>
+                    <div className="absolute top-[20%] right-[-10%] w-96 h-96 bg-blue-600 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-2000"></div>
+                    <div className="absolute bottom-[-10%] left-[20%] w-96 h-96 bg-pink-600 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-4000"></div>
+                </div>
+
+                <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+
+                    {/* --- HEADER SECTION --- */}
+                    <div className="flex flex-col md:flex-row justify-between items-end mb-10">
+                        <div>
+                            <p className="text-gray-400 text-sm font-medium tracking-wider uppercase mb-1">Overview</p>
+                            <h1 className="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-400">
+                                {greeting}, {auth.user.name.split(' ')[0]}! 👋
+                            </h1>
                         </div>
-                    )}
-
-                    {/* B. TOTAL SALDO CARD */}
-                    <div className="bg-white overflow-hidden shadow-sm sm:rounded-lg mb-8">
-                        <div className="p-6 text-gray-900">
-                            <h3 className="text-gray-500 text-sm font-medium uppercase tracking-wider">Total Kekayaan Bersih</h3>
-                            <div className="flex items-center mt-2">
-                                <span className="text-4xl font-extrabold text-gray-900 tracking-tight">
-                                    {formatRupiah(totalBalance || 0)}
-                                </span>
-                            </div>
-                            <p className="text-sm text-gray-400 mt-2">Akumulasi dari semua dompet aktif</p>
-                        </div>
-                    </div>
-
-                    {/* C. LIST DOMPET (GRID) */}
-                    <div className="flex justify-between items-center mb-6 px-2">
-                        <h3 className="text-lg font-semibold text-gray-700">Dompet Saya</h3>
-                        {/* Tombol tambah (Nanti kita fungsikan) */}
-                        <button className="text-sm bg-gray-800 text-white px-4 py-2 rounded-md hover:bg-gray-700 transition">
-                            + Tambah Dompet
+                        <button className="mt-4 md:mt-0 px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 rounded-xl font-bold shadow-lg shadow-blue-500/30 transform hover:-translate-y-1 transition-all duration-300">
+                            + Transaksi Baru
                         </button>
                     </div>
 
+                    {/* --- TOTAL BALANCE CARD (HERO) --- */}
+                    <div className="w-full p-8 mb-10 rounded-3xl bg-gradient-to-br from-gray-800/50 to-gray-900/50 backdrop-blur-xl border border-white/10 shadow-2xl relative overflow-hidden group">
+                        {/* Shimmer Effect on Hover */}
+                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full group-hover:animate-shimmer"></div>
+
+                        <div className="relative z-10 flex flex-col md:flex-row justify-between items-center">
+                            <div>
+                                <h3 className="text-gray-400 font-medium mb-2">Total Kekayaan Bersih</h3>
+                                <div className="text-5xl md:text-6xl font-bold tracking-tight text-white drop-shadow-lg">
+                                    {formatRupiah(totalBalance || 0)}
+                                </div>
+                                <div className="flex items-center mt-4 text-green-400 text-sm font-medium bg-green-400/10 px-3 py-1 rounded-full w-fit">
+                                    <span>↗ +12.5% bulan ini</span>
+                                </div>
+                            </div>
+                            <div className="hidden md:block opacity-20">
+                                {/* Icon Dekorasi Besar */}
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-32 w-32" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* --- WALLETS SECTION --- */}
+                    <div className="flex justify-between items-center mb-6">
+                        <h2 className="text-2xl font-bold text-white">Dompet Saya</h2>
+                        <button className="text-sm text-blue-400 hover:text-blue-300 hover:underline">Lihat Semua</button>
+                    </div>
+
+                    {/* Grid Layout */}
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
 
-                        {/* Cek: Jika dompet kosong, tampilkan pesan */}
-                        {safeWallets.length === 0 ? (
-                            <div className="col-span-full p-8 text-center bg-gray-50 rounded-xl border-2 border-dashed border-gray-300">
-                                <p className="text-gray-500 mb-2">Belum ada dompet yang dibuat.</p>
-                                <p className="text-sm text-gray-400">Jalankan Seeder database atau buat manual.</p>
+                        {/* Add New Wallet Card (Dashed) */}
+                        <div className="group border-2 border-dashed border-gray-700 rounded-2xl flex flex-col items-center justify-center p-6 cursor-pointer hover:border-blue-500 hover:bg-gray-800/30 transition-all duration-300 min-h-[200px]">
+                            <div className="w-12 h-12 rounded-full bg-gray-800 group-hover:bg-blue-600 flex items-center justify-center transition-colors duration-300 mb-3">
+                                <span className="text-2xl text-gray-400 group-hover:text-white">+</span>
                             </div>
-                        ) : (
-                            // Loop data dompet
-                            safeWallets.map((wallet) => (
+                            <p className="text-gray-500 group-hover:text-white font-medium">Tambah Dompet</p>
+                        </div>
+
+                        {/* Wallet Cards */}
+                        {safeWallets.map((wallet) => (
+                            <div
+                                key={wallet.id}
+                                className="relative group p-6 rounded-2xl bg-gray-800/40 backdrop-blur-md border border-white/5 hover:border-white/20 transition-all duration-500 hover:shadow-[0_0_30px_rgba(59,130,246,0.15)] overflow-hidden transform hover:-translate-y-2"
+                            >
+                                {/* Gradient Background based on Wallet Color */}
                                 <div
-                                    key={wallet.id}
-                                    className="relative overflow-hidden rounded-2xl shadow-lg p-6 text-white transition-all transform hover:-translate-y-1 hover:shadow-xl cursor-pointer"
-                                    style={{
-                                        backgroundColor: wallet.color_hex || '#1F2937', // Default warna gelap jika null
-                                        background: `linear-gradient(135deg, ${wallet.color_hex || '#333'}, #000000)` // Efek gradasi
-                                    }}
-                                >
-                                    {/* Hiasan Latar Belakang (Lingkaran Transparan) */}
-                                    <div className="absolute -top-6 -right-6 w-32 h-32 bg-white opacity-10 rounded-full blur-2xl"></div>
-                                    <div className="absolute top-1/2 -left-6 w-24 h-24 bg-white opacity-5 rounded-full blur-xl"></div>
+                                    className="absolute inset-0 opacity-0 group-hover:opacity-20 transition-opacity duration-500"
+                                    style={{ background: `linear-gradient(135deg, ${wallet.color_hex || '#3B82F6'}, transparent)` }}
+                                ></div>
 
-                                    {/* Konten Kartu */}
-                                    <div className="relative z-10 flex flex-col h-full justify-between min-h-[140px]">
-
-                                        {/* Header Kartu */}
-                                        <div className="flex justify-between items-start">
-                                            <div>
-                                                <p className="text-xs font-medium opacity-80 uppercase tracking-widest mb-1">
-                                                    {wallet.type}
-                                                </p>
-                                                <h4 className="text-xl font-bold tracking-wide truncate pr-2">
-                                                    {wallet.name}
-                                                </h4>
-                                            </div>
-                                            {/* Icon Sederhana berdasarkan tipe */}
-                                            <div className="bg-white bg-opacity-20 p-2 rounded-lg backdrop-blur-sm">
-                                                <span className="text-xl">
-                                                    {wallet.type === 'cash' ? '💵' :
-                                                        wallet.type === 'bank' ? '🏦' :
-                                                            wallet.type === 'ewallet' ? '📱' : '💳'}
-                                                </span>
-                                            </div>
+                                <div className="relative z-10 flex flex-col h-full justify-between min-h-[160px]">
+                                    <div className="flex justify-between items-start">
+                                        <div className="p-3 rounded-xl bg-gray-900/50 border border-white/10 shadow-inner">
+                                            <span className="text-2xl">
+                                                {wallet.type === 'cash' ? '💵' : wallet.type === 'bank' ? '🏦' : '💳'}
+                                            </span>
                                         </div>
+                                        <span className="px-3 py-1 text-xs font-bold uppercase tracking-wider text-gray-400 bg-gray-900/50 rounded-full border border-white/5">
+                                            {wallet.type}
+                                        </span>
+                                    </div>
 
-                                        {/* Saldo Kartu */}
-                                        <div className="mt-4">
-                                            <p className="text-xs opacity-60 mb-1">Saldo Saat Ini</p>
-                                            <p className="text-2xl font-bold font-mono tracking-tight">
-                                                {formatRupiah(wallet.balance)}
-                                            </p>
-                                        </div>
+                                    <div>
+                                        <h4 className="text-lg font-semibold text-gray-200 mb-1 group-hover:text-white transition-colors">{wallet.name}</h4>
+                                        <p className="text-2xl font-bold text-white tracking-wide">
+                                            {formatRupiah(wallet.balance)}
+                                        </p>
                                     </div>
                                 </div>
-                            ))
-                        )}
+                            </div>
+                        ))}
+                    </div>
+
+                    {/* --- RECENT TRANSACTIONS (Placeholder Table) --- */}
+                    <div className="mt-12">
+                        <h2 className="text-2xl font-bold text-white mb-6">Transaksi Terakhir</h2>
+                        <div className="bg-gray-800/40 backdrop-blur-md rounded-2xl border border-white/5 p-8 text-center">
+                            <p className="text-gray-500">Belum ada transaksi bulan ini.</p>
+                            <p className="text-sm text-gray-600 mt-2">Mulai catat pengeluaranmu sekarang!</p>
+                        </div>
                     </div>
 
                 </div>
             </div>
+
+            {/* --- CSS STYLE TAMBAHAN --- */}
+            <style>{`
+                @keyframes blob {
+                    0% { transform: translate(0px, 0px) scale(1); }
+                    33% { transform: translate(30px, -50px) scale(1.1); }
+                    66% { transform: translate(-20px, 20px) scale(0.9); }
+                    100% { transform: translate(0px, 0px) scale(1); }
+                }
+                @keyframes shimmer {
+                    100% { transform: translateX(100%); }
+                }
+                .animate-blob { animation: blob 7s infinite; }
+                .animation-delay-2000 { animation-delay: 2s; }
+                .animation-delay-4000 { animation-delay: 4s; }
+                .animate-shimmer { animation: shimmer 2s infinite; }
+            `}</style>
         </AuthenticatedLayout>
     );
 }
