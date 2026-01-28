@@ -20,17 +20,17 @@ class WalletController extends Controller
         $currentMonth = date('m');
         $currentYear = date('Y');
 
-        // 1. Ambil Data Dompet (Milik User)
+        // 1. Ambil Data Dompet
         $wallets = Wallet::where('user_id', $user->id)->get();
 
-        // 2. Ambil Data Kategori (Milik User + Default System/Null)
+        // 2. Ambil Data Kategori
         $categories = Category::where('user_id', $user->id)
             ->orWhereNull('user_id')
             ->get();
 
-        // 3. Ambil 5 Transaksi Terakhir (Untuk List Recent Transactions)
+        // 3. Ambil 5 Transaksi Terakhir
         $transactions = Transaction::where('user_id', $user->id)
-            ->with(['category', 'wallet']) // Load relasi agar nama/icon muncul
+            ->with(['category', 'wallet'])
             ->latest('transaction_date')
             ->take(5)
             ->get();
@@ -49,7 +49,21 @@ class WalletController extends Controller
             ->where('type', 'expense')
             ->sum('amount');
 
-        // Kirim semua data ke Frontend (Dashboard.jsx)
+        // 6. DATA UNTUK CHART (Pengeluaran per Kategori)
+        $expenseChart = Transaction::where('transactions.user_id', $user->id) // Prefix transactions.
+            ->whereMonth('transaction_date', $currentMonth)
+            ->whereYear('transaction_date', $currentYear)
+            ->where('transactions.type', 'expense') // <--- FIX DISINI (tambahkan prefix transactions.)
+            ->join('categories', 'transactions.category_id', '=', 'categories.id')
+            ->selectRaw('categories.name as category_name, sum(transactions.amount) as total')
+            ->groupBy('categories.name')
+            ->orderByDesc('total')
+            ->get();
+
+        // Siapkan Array untuk ChartJS
+        $chartLabels = $expenseChart->pluck('category_name');
+        $chartData = $expenseChart->pluck('total');
+
         return Inertia::render('Dashboard', [
             'wallets' => $wallets,
             'categories' => $categories,
@@ -57,6 +71,8 @@ class WalletController extends Controller
             'totalBalance' => $wallets->sum('balance'),
             'monthlyIncome' => $monthlyIncome,
             'monthlyExpense' => $monthlyExpense,
+            'chartLabels' => $chartLabels,
+            'chartData' => $chartData,
         ]);
     }
 
@@ -78,21 +94,18 @@ class WalletController extends Controller
             'type' => $request->type,
             'balance' => $request->balance,
             'color_hex' => $request->color_hex,
-            'currency' => 'IDR' // Default currency
+            'currency' => 'IDR'
         ]);
 
         return redirect()->back()->with('message', 'Dompet berhasil dibuat!');
     }
 
     /**
-     * Mengupdate dompet yang sudah ada.
+     * Mengupdate dompet.
      */
     public function update(Request $request, Wallet $wallet)
     {
-        // Security: Pastikan user hanya mengedit dompet miliknya
-        if ($wallet->user_id !== Auth::id()) {
-            abort(403);
-        }
+        if ($wallet->user_id !== Auth::id()) abort(403);
 
         $request->validate([
             'name' => 'required|string|max:255',
@@ -116,16 +129,8 @@ class WalletController extends Controller
      */
     public function destroy(Wallet $wallet)
     {
-        // Security: Pastikan user hanya menghapus dompet miliknya
-        if ($wallet->user_id !== Auth::id()) {
-            abort(403);
-        }
-
-        // Opsional: Cek apakah ada transaksi di dompet ini sebelum hapus?
-        // Untuk sekarang kita hapus saja (transaksi terkait akan kehilangan relasi wallet_id atau ikut terhapus jika di-set cascade)
-
+        if ($wallet->user_id !== Auth::id()) abort(403);
         $wallet->delete();
-
         return redirect()->back()->with('message', 'Dompet berhasil dihapus!');
     }
 }

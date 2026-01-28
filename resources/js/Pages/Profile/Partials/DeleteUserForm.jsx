@@ -1,3 +1,4 @@
+import { useRef, useState } from 'react';
 import DangerButton from '@/Components/DangerButton';
 import InputError from '@/Components/InputError';
 import InputLabel from '@/Components/InputLabel';
@@ -5,7 +6,6 @@ import Modal from '@/Components/Modal';
 import SecondaryButton from '@/Components/SecondaryButton';
 import TextInput from '@/Components/TextInput';
 import { useForm } from '@inertiajs/react';
-import { useState, useRef } from 'react';
 
 export default function DeleteUserForm({ className = '' }) {
     const [confirmingUserDeletion, setConfirmingUserDeletion] = useState(false);
@@ -39,32 +39,28 @@ export default function DeleteUserForm({ className = '' }) {
 
     const closeModal = () => {
         setConfirmingUserDeletion(false);
-
         reset();
     };
 
     return (
         <section className={`space-y-6 ${className}`}>
             <header>
-                {/* UBAH WARNA JUDUL & DESKRIPSI */}
-                <h2 className="text-lg font-medium text-red-400">Delete Account</h2>
-
-                <p className="mt-1 text-sm text-gray-300">
-                    Once your account is deleted, all of its resources and data will be permanently deleted.
+                <h2 className="text-lg font-medium text-white">Hapus Akun</h2>
+                <p className="mt-1 text-sm text-gray-400">
+                    Setelah akun dihapus, semua data dan sumber daya (transaksi, dompet) akan dihapus secara permanen.
                 </p>
             </header>
 
-            <DangerButton onClick={confirmUserDeletion}>Delete Account</DangerButton>
+            <DangerButton onClick={confirmUserDeletion}>Hapus Akun</DangerButton>
 
             <Modal show={confirmingUserDeletion} onClose={closeModal}>
-                {/* Modal Background perlu gelap juga */}
-                <form onSubmit={deleteUser} className="p-6 bg-gray-900 border border-white/10 text-white">
+                <form onSubmit={deleteUser} className="p-6 bg-gray-900 text-white border border-white/10">
                     <h2 className="text-lg font-medium text-white">
-                        Are you sure you want to delete your account?
+                        Apakah Anda yakin ingin menghapus akun?
                     </h2>
 
                     <p className="mt-1 text-sm text-gray-400">
-                        Once your account is deleted, all of its resources and data will be permanently deleted.
+                        Semua data transaksi dan dompet akan hilang selamanya. Masukkan password Anda untuk konfirmasi.
                     </p>
 
                     <div className="mt-6">
@@ -77,7 +73,7 @@ export default function DeleteUserForm({ className = '' }) {
                             ref={passwordInput}
                             value={data.password}
                             onChange={(e) => setData('password', e.target.value)}
-                            className="mt-1 block w-3/4"
+                            className="mt-1 block w-3/4 bg-gray-800 border-gray-700 text-white placeholder-gray-500 focus:border-red-500 focus:ring-red-500"
                             isFocused
                             placeholder="Password"
                         />
@@ -86,10 +82,12 @@ export default function DeleteUserForm({ className = '' }) {
                     </div>
 
                     <div className="mt-6 flex justify-end">
-                        <SecondaryButton onClick={closeModal} className="bg-gray-700 text-white border-gray-600 hover:bg-gray-600">Cancel</SecondaryButton>
+                        <SecondaryButton onClick={closeModal} className="bg-gray-800 text-white hover:bg-gray-700 border-gray-600">
+                            Batal
+                        </SecondaryButton>
 
-                        <DangerButton className="ms-3" disabled={processing}>
-                            Delete Account
+                        <DangerButton className="ml-3" disabled={processing}>
+                            Hapus Akun
                         </DangerButton>
                     </div>
                 </form>

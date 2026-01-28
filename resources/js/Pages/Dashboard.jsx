@@ -2,18 +2,19 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import CreateWalletModal from '@/Pages/Wallets/Partials/CreateWalletModal';
 import CreateTransactionModal from '@/Pages/Transactions/Partials/CreateTransactionModal';
 import CreateCategoryModal from '@/Pages/Categories/Partials/CreateCategoryModal';
+import ExpenseChart from '@/Components/ExpenseChart'; // Import the Chart Component
 import { Head, Link } from '@inertiajs/react';
 import { useState } from 'react';
 
-// Pastikan menerima prop 'transactions' dari controller
-export default function Dashboard({ auth, wallets, categories, transactions, totalBalance, monthlyIncome, monthlyExpense }) {
+// Receive props including chartLabels and chartData
+export default function Dashboard({ auth, wallets, categories, transactions, totalBalance, monthlyIncome, monthlyExpense, chartLabels, chartData }) {
 
     // --- 1. STATE MANAGEMENT ---
     const [showCreateWallet, setShowCreateWallet] = useState(false);
     const [showCreateTransaction, setShowCreateTransaction] = useState(false);
     const [showCreateCategory, setShowCreateCategory] = useState(false);
 
-    // State untuk Edit Dompet
+    // State for Editing Wallet
     const [editingWallet, setEditingWallet] = useState(null);
 
     // --- 2. DATA PROCESSING ---
@@ -31,7 +32,7 @@ export default function Dashboard({ auth, wallets, categories, transactions, tot
         }).format(number);
     };
 
-    // Helper: Format Tanggal (PENTING: Ini yang sebelumnya hilang)
+    // Helper: Format Date
     const formatDate = (dateString) => {
         const options = { day: 'numeric', month: 'short', year: 'numeric' };
         return new Date(dateString).toLocaleDateString('id-ID', options);
@@ -85,40 +86,78 @@ export default function Dashboard({ auth, wallets, categories, transactions, tot
                         </div>
                     </div>
 
-                    {/* --- TOTAL BALANCE & SUMMARY --- */}
+                    {/* --- SECTION 1: STATS & CHARTS --- */}
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-10">
-                        {/* Kartu Total Saldo */}
-                        <div className="lg:col-span-2 p-8 rounded-3xl bg-gradient-to-br from-gray-800/50 to-gray-900/50 backdrop-blur-xl border border-white/10 shadow-2xl relative overflow-hidden group flex flex-col justify-center">
-                            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full group-hover:animate-shimmer"></div>
-                            <h3 className="text-gray-400 font-medium mb-2">Total Kekayaan Bersih</h3>
-                            <div className="text-5xl md:text-6xl font-bold tracking-tight text-white drop-shadow-lg">
-                                {formatRupiah(totalBalance || 0)}
+
+                        {/* LEFT COLUMN (2/3 width): Total Balance & Chart */}
+                        <div className="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6">
+
+                            {/* Card 1: Total Balance */}
+                            <div className="flex flex-col justify-between p-8 rounded-3xl bg-gradient-to-br from-blue-900/40 to-gray-900/50 backdrop-blur-xl border border-blue-500/20 shadow-2xl relative overflow-hidden h-full min-h-[280px]">
+                                <div className="absolute inset-0 bg-gradient-to-r from-blue-600/10 to-transparent pointer-events-none"></div>
+
+                                <div className="relative z-10">
+                                    <h3 className="text-blue-200 font-medium mb-2">Total Kekayaan Bersih</h3>
+                                    <div className="text-4xl lg:text-5xl font-bold tracking-tight text-white drop-shadow-lg">
+                                        {formatRupiah(totalBalance || 0)}
+                                    </div>
+                                </div>
+
+                                <div className="relative z-10 mt-6 flex items-center gap-2 text-blue-400 text-xs font-bold bg-blue-500/10 w-fit px-3 py-1.5 rounded-full border border-blue-500/20">
+                                    <span className="w-2 h-2 bg-blue-400 rounded-full animate-pulse"></span>
+                                    DATA REAL-TIME
+                                </div>
+                                <div className="absolute right-[-20px] bottom-[-20px] text-9xl opacity-10 pointer-events-none">
+                                    💰
+                                </div>
                             </div>
-                            <div className="hidden md:block absolute right-8 bottom-8 opacity-20">
-                                <span className="text-8xl">💰</span>
+
+                            {/* Card 2: Expense Chart */}
+                            <div className="flex flex-col p-6 rounded-3xl bg-gray-800/40 backdrop-blur-xl border border-white/5 shadow-xl h-full min-h-[280px]">
+                                <div className="flex justify-between items-center mb-4">
+                                    <h3 className="text-gray-400 text-xs font-bold uppercase tracking-wider">Pengeluaran</h3>
+                                    <span className="text-[10px] text-gray-500 bg-gray-900 px-2 py-1 rounded-md border border-white/5">
+                                        Bulan Ini
+                                    </span>
+                                </div>
+
+                                {/* Chart Container - Centered */}
+                                <div className="flex-1 w-full flex items-center justify-center relative">
+                                    <ExpenseChart labels={chartLabels} data={chartData} />
+                                </div>
                             </div>
                         </div>
 
-                        {/* Kartu Ringkasan Pemasukan & Pengeluaran */}
-                        <div className="flex flex-col gap-4">
-                            <div className="flex-1 p-5 rounded-2xl bg-green-900/20 border border-green-500/20 backdrop-blur-sm flex items-center gap-4">
-                                <div className="w-12 h-12 rounded-full bg-green-500/20 flex items-center justify-center text-2xl">⬇️</div>
-                                <div>
-                                    <p className="text-green-400 text-xs uppercase font-bold tracking-wider">Pemasukan</p>
-                                    <p className="text-2xl font-bold text-white">{formatRupiah(monthlyIncome || 0)}</p>
+                        {/* RIGHT COLUMN (1/3 width): Monthly Summary (Stacked) */}
+                        <div className="flex flex-col gap-4 h-full">
+
+                            {/* Income Card */}
+                            <div className="flex-1 p-6 rounded-3xl bg-emerald-900/10 border border-emerald-500/20 backdrop-blur-sm flex flex-col justify-center gap-1 transition hover:bg-emerald-900/20">
+                                <div className="flex items-center justify-between mb-2">
+                                    <div className="w-10 h-10 rounded-xl bg-emerald-500/20 flex items-center justify-center text-lg shadow-inner border border-emerald-500/30">
+                                        ⬇️
+                                    </div>
+                                    <span className="text-emerald-500/50 text-[10px] font-bold tracking-widest uppercase">Income</span>
                                 </div>
+                                <p className="text-emerald-400 text-xs uppercase font-bold tracking-wider">Pemasukan</p>
+                                <p className="text-2xl font-bold text-white truncate">{formatRupiah(monthlyIncome || 0)}</p>
                             </div>
-                            <div className="flex-1 p-5 rounded-2xl bg-red-900/20 border border-red-500/20 backdrop-blur-sm flex items-center gap-4">
-                                <div className="w-12 h-12 rounded-full bg-red-500/20 flex items-center justify-center text-2xl">⬆️</div>
-                                <div>
-                                    <p className="text-red-400 text-xs uppercase font-bold tracking-wider">Pengeluaran</p>
-                                    <p className="text-2xl font-bold text-white">{formatRupiah(monthlyExpense || 0)}</p>
+
+                            {/* Expense Card */}
+                            <div className="flex-1 p-6 rounded-3xl bg-rose-900/10 border border-rose-500/20 backdrop-blur-sm flex flex-col justify-center gap-1 transition hover:bg-rose-900/20">
+                                <div className="flex items-center justify-between mb-2">
+                                    <div className="w-10 h-10 rounded-xl bg-rose-500/20 flex items-center justify-center text-lg shadow-inner border border-rose-500/30">
+                                        ⬆️
+                                    </div>
+                                    <span className="text-rose-500/50 text-[10px] font-bold tracking-widest uppercase">Expense</span>
                                 </div>
+                                <p className="text-rose-400 text-xs uppercase font-bold tracking-wider">Pengeluaran</p>
+                                <p className="text-2xl font-bold text-white truncate">{formatRupiah(monthlyExpense || 0)}</p>
                             </div>
                         </div>
                     </div>
 
-                    {/* --- WALLETS SECTION --- */}
+                    {/* --- SECTION 2: WALLETS --- */}
                     <div className="flex justify-between items-center mb-6">
                         <h2 className="text-2xl font-bold text-white">Dompet Saya</h2>
                         <button className="text-sm text-blue-400 hover:text-blue-300 hover:underline">Lihat Semua</button>
@@ -126,13 +165,13 @@ export default function Dashboard({ auth, wallets, categories, transactions, tot
 
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-10">
 
-                        {/* KARTU TAMBAH DOMPET */}
+                        {/* Add Wallet Card */}
                         <div
                             onClick={() => {
                                 setEditingWallet(null);
                                 setShowCreateWallet(true);
                             }}
-                            className="group border-2 border-dashed border-gray-700 rounded-2xl flex flex-col items-center justify-center p-6 cursor-pointer hover:border-blue-500 hover:bg-gray-800/30 transition-all duration-300 min-h-[160px]"
+                            className="group border border-dashed border-gray-700 rounded-2xl flex flex-col items-center justify-center p-6 cursor-pointer hover:border-blue-500 hover:bg-gray-800/30 transition-all duration-300 min-h-[160px]"
                         >
                             <div className="w-12 h-12 rounded-full bg-gray-800 group-hover:bg-blue-600 flex items-center justify-center transition-colors duration-300 mb-3">
                                 <span className="text-2xl text-gray-400 group-hover:text-white">+</span>
@@ -140,11 +179,11 @@ export default function Dashboard({ auth, wallets, categories, transactions, tot
                             <p className="text-gray-500 group-hover:text-white font-medium">Tambah Dompet</p>
                         </div>
 
-                        {/* LIST DOMPET */}
+                        {/* Wallet List */}
                         {safeWallets.map((wallet) => (
                             <div
                                 key={wallet.id}
-                                className="relative group p-6 rounded-2xl bg-gray-800/40 backdrop-blur-md border border-white/5 hover:border-white/20 transition-all duration-500 hover:shadow-[0_0_30px_rgba(59,130,246,0.15)] overflow-hidden transform hover:-translate-y-2 cursor-pointer"
+                                className="relative group p-6 rounded-2xl bg-gray-800/40 backdrop-blur-md border border-white/5 hover:border-white/20 transition-all duration-500 hover:shadow-[0_0_30px_rgba(59,130,246,0.15)] overflow-hidden transform hover:-translate-y-2 cursor-pointer min-h-[160px]"
                                 onClick={() => {
                                     setEditingWallet(wallet);
                                     setShowCreateWallet(true);
@@ -155,7 +194,7 @@ export default function Dashboard({ auth, wallets, categories, transactions, tot
                                     style={{ background: `linear-gradient(135deg, ${wallet.color_hex || '#3B82F6'}, transparent)` }}
                                 ></div>
 
-                                {/* TOMBOL EDIT (FIXED POSITION: BOTTOM RIGHT) */}
+                                {/* Edit Button (Bottom Right) */}
                                 <button
                                     onClick={(e) => {
                                         e.stopPropagation();
@@ -168,7 +207,7 @@ export default function Dashboard({ auth, wallets, categories, transactions, tot
                                     <span className="text-xs">✏️</span>
                                 </button>
 
-                                <div className="relative z-10 flex flex-col h-full justify-between min-h-[120px]">
+                                <div className="relative z-10 flex flex-col h-full justify-between">
                                     <div className="flex justify-between items-start">
                                         <div className="p-2 rounded-xl bg-gray-900/50 border border-white/10 shadow-inner backdrop-blur-sm">
                                             <span className="text-xl">
@@ -181,8 +220,8 @@ export default function Dashboard({ auth, wallets, categories, transactions, tot
                                     </div>
 
                                     <div>
-                                        <h4 className="text-base font-semibold text-gray-200 mb-1 group-hover:text-white transition-colors truncate pr-8">{wallet.name}</h4>
-                                        <p className="text-xl font-bold text-white tracking-wide">
+                                        <h4 className="text-lg font-semibold text-gray-200 mb-1 group-hover:text-white transition-colors truncate pr-8">{wallet.name}</h4>
+                                        <p className="text-2xl font-bold text-white tracking-wide">
                                             {formatRupiah(wallet.balance)}
                                         </p>
                                     </div>
@@ -191,11 +230,10 @@ export default function Dashboard({ auth, wallets, categories, transactions, tot
                         ))}
                     </div>
 
-                    {/* --- TRANSAKSI TERAKHIR --- */}
+                    {/* --- SECTION 3: RECENT TRANSACTIONS --- */}
                     <div className="mt-12">
                         <div className="flex justify-between items-center mb-6">
                             <h2 className="text-2xl font-bold text-white">Transaksi Terakhir</h2>
-                            {/* FIX: Ubah jadi Link agar berfungsi */}
                             <Link href={route('transactions.index')} className="text-sm text-blue-400 hover:text-blue-300 hover:underline">
                                 Lihat Semua
                             </Link>
@@ -207,7 +245,7 @@ export default function Dashboard({ auth, wallets, categories, transactions, tot
                                     {safeTransactions.map((trx) => (
                                         <div key={trx.id} className="p-5 flex items-center justify-between hover:bg-white/5 transition-colors group cursor-pointer">
 
-                                            {/* Kiri: Ikon & Info */}
+                                            {/* Left: Icon & Info */}
                                             <div className="flex items-center gap-4">
                                                 <div className={`w-12 h-12 rounded-2xl flex items-center justify-center text-2xl border border-white/5 shadow-inner ${trx.type === 'expense' ? 'bg-red-500/10 text-red-500' : 'bg-green-500/10 text-green-500'
                                                     }`}>
@@ -228,7 +266,7 @@ export default function Dashboard({ auth, wallets, categories, transactions, tot
                                                 </div>
                                             </div>
 
-                                            {/* Kanan: Nominal */}
+                                            {/* Right: Amount */}
                                             <div className="text-right">
                                                 <p className={`text-lg font-bold tracking-wide ${trx.type === 'expense' ? 'text-red-400' : 'text-green-400'
                                                     }`}>
@@ -283,7 +321,7 @@ export default function Dashboard({ auth, wallets, categories, transactions, tot
                 onCreateCategory={() => { setShowCreateTransaction(false); setTimeout(() => setShowCreateCategory(true), 200); }}
             />
 
-            {/* Style Animasi */}
+            {/* Style Animation */}
             <style>{`
                 @keyframes blob { 0% { transform: translate(0px, 0px) scale(1); } 33% { transform: translate(30px, -50px) scale(1.1); } 66% { transform: translate(-20px, 20px) scale(0.9); } 100% { transform: translate(0px, 0px) scale(1); } }
                 @keyframes shimmer { 100% { transform: translateX(100%); } }

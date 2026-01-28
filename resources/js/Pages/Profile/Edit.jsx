@@ -8,22 +8,22 @@ export default function Edit({ auth, mustVerifyEmail, status }) {
     return (
         <AuthenticatedLayout
             user={auth.user}
-            header={<h2 className="font-semibold text-xl text-white leading-tight">Profile</h2>}
+            header={<h2 className="font-semibold text-xl text-gray-200 leading-tight">Profile</h2>}
         >
             <Head title="Profile" />
 
-            <div className="min-h-screen bg-gray-900 relative overflow-hidden pb-12">
+            <div className="min-h-screen bg-gray-900 text-white relative overflow-hidden pb-12">
 
-                {/* Background Blobs (Sama seperti Dashboard) */}
+                {/* Background Decoration */}
                 <div className="absolute top-0 left-0 w-full h-full overflow-hidden z-0 pointer-events-none">
-                    <div className="absolute top-[-10%] left-[-10%] w-96 h-96 bg-purple-600 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob"></div>
-                    <div className="absolute top-[20%] right-[-10%] w-96 h-96 bg-blue-600 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-2000"></div>
+                    <div className="absolute top-[20%] left-[-10%] w-96 h-96 bg-blue-600 rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-blob"></div>
+                    <div className="absolute bottom-[20%] right-[-10%] w-96 h-96 bg-purple-600 rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-blob"></div>
                 </div>
 
-                <div className="relative z-10 max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6 pt-10">
+                <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6 py-12">
 
-                    {/* CARD 1: UPDATE INFO */}
-                    <div className="p-8 bg-gray-800/50 backdrop-blur-xl border border-white/10 shadow-2xl rounded-3xl">
+                    {/* Kartu 1: Update Info Profil */}
+                    <div className="p-4 sm:p-8 bg-gray-800/50 backdrop-blur-md border border-white/10 shadow-xl sm:rounded-lg">
                         <UpdateProfileInformationForm
                             mustVerifyEmail={mustVerifyEmail}
                             status={status}
@@ -31,29 +31,19 @@ export default function Edit({ auth, mustVerifyEmail, status }) {
                         />
                     </div>
 
-                    {/* CARD 2: UPDATE PASSWORD */}
-                    <div className="p-8 bg-gray-800/50 backdrop-blur-xl border border-white/10 shadow-2xl rounded-3xl">
+                    {/* Kartu 2: Ganti Password */}
+                    <div className="p-4 sm:p-8 bg-gray-800/50 backdrop-blur-md border border-white/10 shadow-xl sm:rounded-lg">
                         <UpdatePasswordForm className="max-w-xl" />
                     </div>
 
-                    {/* CARD 3: DELETE ACCOUNT */}
-                    <div className="p-8 bg-red-900/20 backdrop-blur-xl border border-red-500/20 shadow-2xl rounded-3xl">
+                    {/* Kartu 3: Hapus Akun */}
+                    <div className="p-4 sm:p-8 bg-gray-800/50 backdrop-blur-md border border-white/10 shadow-xl sm:rounded-lg">
                         <DeleteUserForm className="max-w-xl" />
                     </div>
                 </div>
             </div>
 
-            {/* Style Animasi */}
-            <style>{`
-                @keyframes blob {
-                    0% { transform: translate(0px, 0px) scale(1); }
-                    33% { transform: translate(30px, -50px) scale(1.1); }
-                    66% { transform: translate(-20px, 20px) scale(0.9); }
-                    100% { transform: translate(0px, 0px) scale(1); }
-                }
-                .animate-blob { animation: blob 7s infinite; }
-                .animation-delay-2000 { animation-delay: 2s; }
-            `}</style>
+            <style>{` .animate-blob { animation: blob 7s infinite; } `}</style>
         </AuthenticatedLayout>
     );
 }
