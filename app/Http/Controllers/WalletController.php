@@ -83,6 +83,7 @@ class WalletController extends Controller
             $percentage = $budget->amount > 0 ? ($spent / $budget->amount) * 100 : 0;
 
             return [
+                'id' => $budget->id,
                 'category_name' => $budget->category->name,
                 'category_icon' => $budget->category->icon_name,
                 'limit' => $budget->amount,
