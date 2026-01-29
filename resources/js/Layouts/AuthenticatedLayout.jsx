@@ -3,6 +3,7 @@ import NavLink from '@/Components/NavLink';
 import ResponsiveNavLink from '@/Components/ResponsiveNavLink';
 import { Link, usePage } from '@inertiajs/react';
 import { useState } from 'react';
+import FlashMessage from '@/Components/FlashMessage'; // <--- Import FlashMessage
 
 export default function AuthenticatedLayout({ header, children }) {
     const user = usePage().props.auth.user;
@@ -11,7 +12,10 @@ export default function AuthenticatedLayout({ header, children }) {
         useState(false);
 
     return (
-        <div className="min-h-screen bg-gray-900 text-gray-100">
+        <div className="min-h-screen bg-gray-900 text-gray-100 relative">
+
+            {/* --- FLASH MESSAGE (Global Notification) --- */}
+            <FlashMessage />
 
             {/* Navbar Glassmorphism */}
             <nav className="border-b border-white/10 bg-gray-900/80 backdrop-blur-md sticky top-0 z-50">
@@ -36,8 +40,8 @@ export default function AuthenticatedLayout({ header, children }) {
                                     href={route('dashboard')}
                                     active={route().current('dashboard')}
                                     className={`inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium leading-5 transition duration-150 ease-in-out focus:outline-none ${route().current('dashboard')
-                                            ? 'border-blue-500 text-white'
-                                            : 'border-transparent text-gray-400 hover:text-gray-200 hover:border-gray-600'
+                                        ? 'border-blue-500 text-white'
+                                        : 'border-transparent text-gray-400 hover:text-gray-200 hover:border-gray-600'
                                         }`}
                                 >
                                     Dashboard
@@ -78,7 +82,6 @@ export default function AuthenticatedLayout({ header, children }) {
                                             Manage Account
                                         </div>
 
-                                        {/* FIX: Gunakan !text-gray-300 agar warna abu-abu gelap bawaan tertimpa */}
                                         <Dropdown.Link
                                             href={route('profile.edit')}
                                             className="block w-full px-4 py-2 text-start text-sm leading-5 !text-gray-300 hover:bg-gray-700 hover:!text-white focus:outline-none transition duration-150 ease-in-out"
@@ -157,8 +160,8 @@ export default function AuthenticatedLayout({ header, children }) {
                             href={route('dashboard')}
                             active={route().current('dashboard')}
                             className={`block w-full ps-3 pe-4 py-2 border-l-4 text-start text-base font-medium transition duration-150 ease-in-out ${route().current('dashboard')
-                                    ? 'border-blue-500 text-white bg-blue-500/10'
-                                    : 'border-transparent text-gray-400 hover:text-gray-200 hover:bg-gray-800 hover:border-gray-600'
+                                ? 'border-blue-500 text-white bg-blue-500/10'
+                                : 'border-transparent text-gray-400 hover:text-gray-200 hover:bg-gray-800 hover:border-gray-600'
                                 }`}
                         >
                             Dashboard

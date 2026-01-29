@@ -49,6 +49,10 @@ class TransferController extends Controller
             $toWallet->increment('balance', $request->amount);
         });
 
-        return redirect()->back()->with('message', 'Transfer berhasil!');
+        // CONTOH YANG BENAR:
+        return redirect()->back()->with('message', 'Transfer berhasil dilakukan! 💸');
+
+        // Jika Gagal/Error (Opsional):
+        return redirect()->back()->with('error', 'Saldo tidak mencukupi!');
     }
 }

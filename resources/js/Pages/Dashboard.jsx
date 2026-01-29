@@ -4,9 +4,10 @@ import CreateTransactionModal from '@/Pages/Transactions/Partials/CreateTransact
 import CreateCategoryModal from '@/Pages/Categories/Partials/CreateCategoryModal';
 import CreateTransferModal from '@/Pages/Transfers/Partials/CreateTransferModal';
 import CreateBudgetModal from '@/Pages/Budgets/Partials/CreateBudgetModal';
+import EditBudgetModal from '@/Pages/Budgets/Partials/EditBudgetModal'; // Import EditBudgetModal
 import BudgetCard from '@/Components/BudgetCard';
 import ExpenseChart from '@/Components/ExpenseChart';
-import { Head, Link } from '@inertiajs/react';
+import { Head, Link, router } from '@inertiajs/react'; // Import router for delete
 import { useState } from 'react';
 
 export default function Dashboard({ auth, wallets, categories, transactions, totalBalance, monthlyIncome, monthlyExpense, chartLabels, chartData, budgetProgress }) {
@@ -17,6 +18,11 @@ export default function Dashboard({ auth, wallets, categories, transactions, tot
     const [showCreateCategory, setShowCreateCategory] = useState(false);
     const [showCreateTransfer, setShowCreateTransfer] = useState(false);
     const [showCreateBudget, setShowCreateBudget] = useState(false);
+
+    // State for Edit Budget
+    const [showEditBudget, setShowEditBudget] = useState(false);
+    const [editingBudget, setEditingBudget] = useState(null);
+
     const [editingWallet, setEditingWallet] = useState(null);
 
     // --- DATA HANDLING ---
@@ -29,16 +35,28 @@ export default function Dashboard({ auth, wallets, categories, transactions, tot
     const formatDate = (dateString) => new Date(dateString).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
     const greeting = new Date().getHours() < 12 ? 'Selamat Pagi' : new Date().getHours() < 18 ? 'Selamat Sore' : 'Selamat Malam';
 
+    // --- ACTIONS ---
+    const handleEditBudget = (budget) => {
+        setEditingBudget(budget);
+        setShowEditBudget(true);
+    };
+
+    const handleDeleteBudget = (budget) => {
+        if (confirm(`Hapus anggaran untuk ${budget.category_name}?`)) {
+            router.delete(route('budgets.destroy', budget.id));
+        }
+    };
+
     return (
         <AuthenticatedLayout user={auth.user} header={null}>
             <Head title="Dashboard" />
 
             <div className="min-h-screen bg-[#0B0F19] text-white relative overflow-hidden font-sans selection:bg-purple-500 selection:text-white">
 
-                {/* --- AMBIENT BACKGROUND (AURORA EFFECT) --- */}
+                {/* --- AMBIENT BACKGROUND --- */}
                 <div className="fixed inset-0 w-full h-full overflow-hidden pointer-events-none">
-                    <div className="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] bg-purple-600/20 rounded-full mix-blend-screen filter blur-[120px] animate-pulse-slow"></div>
-                    <div className="absolute top-[20%] right-[-10%] w-[400px] h-[400px] bg-blue-600/20 rounded-full mix-blend-screen filter blur-[120px] animate-pulse-slow delay-1000"></div>
+                    <div className="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] bg-purple-600/20 rounded-full mix-blend-screen filter blur-[100px] animate-pulse-slow"></div>
+                    <div className="absolute top-[20%] right-[-10%] w-[400px] h-[400px] bg-blue-600/20 rounded-full mix-blend-screen filter blur-[100px] animate-pulse-slow delay-1000"></div>
                     <div className="absolute bottom-[-10%] left-[20%] w-[600px] h-[600px] bg-pink-600/10 rounded-full mix-blend-screen filter blur-[120px] animate-pulse-slow delay-2000"></div>
                 </div>
 
@@ -72,7 +90,7 @@ export default function Dashboard({ auth, wallets, categories, transactions, tot
                         </div>
                     </div>
 
-                    {/* --- SECTION 1: MAIN STATS --- */}
+                    {/* --- SECTION 1: STATS GRID --- */}
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-12">
 
                         {/* LEFT: Balance & Chart */}
@@ -144,25 +162,29 @@ export default function Dashboard({ auth, wallets, categories, transactions, tot
                                 </div>
                             </div>
 
-                            {/* --- BUDGET SECTION --- */}
+                            {/* --- BUDGET SECTION (MODERN 3D) --- */}
                             <div className="flex-1 p-5 rounded-[2rem] bg-[#131926]/80 border border-white/5 overflow-hidden flex flex-col transition-all duration-500 hover:border-yellow-500/30 hover:shadow-[0_0_30px_rgba(234,179,8,0.1)]">
                                 <div className="flex justify-between items-center mb-4">
                                     <h3 className="text-gray-200 font-bold text-xs uppercase tracking-wider flex items-center gap-2">
-                                        🛡️ Budgeting
+                                        <span className="text-lg">🛡️</span> Kontrol Anggaran
                                     </h3>
-                                    <button onClick={() => setShowCreateBudget(true)} className="text-[10px] bg-yellow-500/10 hover:bg-yellow-500/20 text-yellow-400 font-bold px-3 py-1 rounded-lg border border-yellow-500/20 transition hover:scale-105">+ Atur</button>
+                                    <button onClick={() => setShowCreateBudget(true)} className="text-[10px] bg-yellow-500/10 hover:bg-yellow-500/20 text-yellow-400 font-bold px-3 py-1 rounded-full border border-yellow-500/20 transition hover:scale-105">+ Atur</button>
                                 </div>
 
                                 <div className="flex-1 overflow-y-auto pr-1 custom-scrollbar space-y-3">
                                     {safeBudgets.length > 0 ? (
                                         safeBudgets.map((budget, index) => (
                                             <div key={index} className="transform transition-all hover:scale-[1.02] hover:translate-x-1">
-                                                <BudgetCard budget={budget} />
+                                                <BudgetCard
+                                                    budget={budget}
+                                                    onEdit={handleEditBudget}
+                                                    onDelete={handleDeleteBudget}
+                                                />
                                             </div>
                                         ))
                                     ) : (
                                         <div className="h-full flex flex-col items-center justify-center text-center opacity-40 py-4">
-                                            <div className="w-12 h-12 bg-white/5 rounded-full flex items-center justify-center mb-2 animate-bounce">🎯</div>
+                                            <span className="text-3xl mb-2 grayscale">🎯</span>
                                             <p className="text-xs text-gray-400">Belum ada anggaran.</p>
                                         </div>
                                     )}
@@ -295,6 +317,7 @@ export default function Dashboard({ auth, wallets, categories, transactions, tot
             <CreateTransactionModal show={showCreateTransaction} onClose={() => setShowCreateTransaction(false)} wallets={safeWallets} categories={safeCategories} onCreateCategory={() => { setShowCreateTransaction(false); setTimeout(() => setShowCreateCategory(true), 200); }} />
             <CreateTransferModal show={showCreateTransfer} onClose={() => setShowCreateTransfer(false)} wallets={safeWallets} />
             <CreateBudgetModal show={showCreateBudget} onClose={() => setShowCreateBudget(false)} categories={safeCategories} />
+            <EditBudgetModal show={showEditBudget} onClose={() => { setShowEditBudget(false); setEditingBudget(null); }} budget={editingBudget} />
 
             <style>{` .animate-pulse-slow { animation: pulse 8s cubic-bezier(0.4, 0, 0.6, 1) infinite; } .custom-scrollbar::-webkit-scrollbar { width: 3px; } .custom-scrollbar::-webkit-scrollbar-thumb { background: #374151; border-radius: 10px; } `}</style>
         </AuthenticatedLayout>
