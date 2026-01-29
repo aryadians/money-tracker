@@ -1,52 +1,43 @@
 <div align="center">
-  <img src="https://raw.githubusercontent.com/aryadians/money-tracker/main/public/icon.svg" alt="Money Tracker" width="100"/>
-
-# Money Tracker
-
-A personal finance management application to track your income and expenses.
-
-[![Laravel](https://img.shields.io/badge/Laravel-v12.x-FF2D20?style=for-the-badge&logo=laravel)](https://laravel.com)
-[![React](https://img.shields.io/badge/React-v18.x-61DAFB?style=for-the-badge&logo=react)](https://reactjs.org)
-[![Vite](https://img.shields.io/badge/Vite-v7.x-646CFF?style=for-the-badge&logo=vite)](https://vitejs.dev)
-[![PHP](https://img.shields.io/badge/PHP-8.2-777BB4?style=for-the-badge&logo=php)](https://www.php.net)
-[![License](https://img.shields.io/badge/License-MIT-green.svg?style=for-the-badge)](LICENSE)
-
+  <img src="https://raw.githubusercontent.com/aryadians/money-tracker/main/public/logo.svg" alt="Money Tracker" width="100"/>
 </div>
 
-## 📖 About The Project
+# 💰 Money Tracker
 
-Money Tracker is a web application designed to help you manage your personal finances effectively. It allows you to track transactions across multiple wallets, categorize your spending, set budgets, and visualize your financial habits through charts.
+A modern, open-source personal finance tracker. Take control of your money, your way.
 
-Built with a modern tech stack, it provides a fast and responsive user experience.
+[![PHP](https://img.shields.io/badge/PHP-8.2-777BB4?style=flat-square&logo=php&logoColor=white)](https://www.php.net)
+[![Laravel](https://img.shields.io/badge/Laravel-12.x-FF2D20?style=flat-square&logo=laravel&logoColor=white)](https://laravel.com)
+[![React](https://img.shields.io/badge/React-18.x-20232A?style=flat-square&logo=react&logoColor=61DAFB)](https://react.dev)
+[![Vite](https://img.shields.io/badge/Vite-7.x-646CFF?style=flat-square&logo=vite&logoColor=white)](https://vitejs.dev)
+[![MySQL](https://img.shields.io/badge/MySQL-8.0-4479A1?style=flat-square&logo=mysql&logoColor=white)](https://www.mysql.com)
+[![License](https://img.shields.io/github/license/aryadians/money-tracker?style=flat-square&color=5D6975)](LICENSE)
 
-### ✨ Features
 
--   **Multi-Wallet Management:** Manage several bank accounts or digital wallets.
--   **Transaction Tracking:** Record income and expenses with descriptions and categories.
--   **Dynamic Categories:** Create and customize categories for your transactions.
--   **Budgeting:** Set monthly or yearly budgets for different categories.
--   **Transfers:** Log transfers between your wallets.
--   **Dashboard & Analytics:** Visualize your financial data with interactive charts.
+## ✨ Core Features
 
-### 🛠️ Built With
+-   **🏦 Multi-Wallet Management**: Handle all your accounts from one place.
+-   **📊 Transaction Tracking**: Log income, expenses, and transfers seamlessly.
+-   **🎯 Budgeting Tools**: Set monthly or yearly budgets and track your progress.
+-   **🏷️ Smart Categorization**: Organize your spending with customizable categories.
+-   **📈 Insightful Analytics**: Visualize your financial health with interactive charts.
+-   **📤 Data Export**: Export your transaction data to Excel.
 
--   **[Laravel](https://laravel.com/)** - Backend Framework
--   **[React](https://reactjs.org/)** - Frontend Library
--   **[Inertia.js](https://inertiajs.com/)** - The modern monolith framework
--   **[Vite](https://vitejs.dev/)** - Frontend Tooling
--   **[Tailwind CSS](https://tailwindcss.com/)** - Utility-First CSS Framework
--   **[MySQL](https://www.mysql.com/)** - Database
+## 🛠️ Tech Stack
+
+| Area      | Technology                                                                                                                              |
+| :-------- | :-------------------------------------------------------------------------------------------------------------------------------------- |
+| **Backend** | [PHP 8.2](https://www.php.net), [Laravel 12](https://laravel.com), [MySQL 8.0](https://www.mysql.com)                                    |
+| **Frontend**  | [React 18](https://react.dev), [Inertia.js](https://inertiajs.com), [Vite](https://vitejs.dev), [Tailwind CSS](https://tailwindcss.com)   |
+| **Tooling**   | [Composer](https://getcomposer.org), [NPM](https://www.npmjs.com), [Git](https://git-scm.com/)                                         |
+
 
 ## 🚀 Getting Started
 
-To get a local copy up and running, follow these simple steps.
-
 ### Prerequisites
-
 -   PHP >= 8.2
 -   Node.js & NPM
 -   Composer
--   A web server (e.g., Nginx, Apache) or use `php artisan serve`
 -   MySQL
 
 ### Installation
@@ -57,52 +48,42 @@ To get a local copy up and running, follow these simple steps.
     cd money-tracker
     ```
 
-2.  **Install PHP dependencies**
+2.  **Install dependencies**
     ```sh
-    composer install
+    composer install && npm install
     ```
 
-3.  **Install NPM packages**
-    ```sh
-    npm install
-    ```
-
-4.  **Setup environment file**
+3.  **Setup your environment**
     ```sh
     cp .env.example .env
     ```
-    *Update your database credentials in the `.env` file.*
+    *Then, update your database credentials in the `.env` file.*
 
-5.  **Generate application key**
+4.  **Generate application key & run migrations**
     ```sh
     php artisan key:generate
-    ```
-
-6.  **Run database migrations**
-    ```sh
     php artisan migrate
     ```
 
-7.  **Run the development server**
+5.  **Build assets and start the servers**
     ```sh
-    npm run dev
-    ```
-    *In a separate terminal:*
-    ```sh
+    # Run the asset build process and local server
+    npm run dev 
+    
+    # In a new terminal, run the PHP server
     php artisan serve
     ```
+    Your app will be available at `http://localhost:8000`.
+
+## 🤝 Contributing
+
+Contributions, issues, and feature requests are welcome! Feel free to check the [issues page](https://github.com/aryadians/money-tracker/issues).
 
 ## 📝 License
 
-Distributed under the MIT License. See `LICENSE` for more information.
-
-## 🙏 Acknowledgements
-
--   [Laravel Breeze](https://laravel.com/docs/starter-kits#laravel-breeze)
--   [Chart.js](https://www.chartjs.org)
--   [Headless UI](https://headlessui.com)
+This project is open-source, licensed under the **MIT License**. See the `LICENSE` file for more details.
 
 ---
-<div align="center">
-Made with ❤️ by [aryadians](https://github.com/aryadians)
-</div>
+<p align="center">
+  Made with ❤️ by <a href="https://github.com/aryadians">aryadians</a>
+</p>
