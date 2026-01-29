@@ -64,7 +64,36 @@ class WalletController extends Controller
         $chartLabels = $expenseChart->pluck('category_name');
         $chartData = $expenseChart->pluck('total');
 
+        // ... kode chart sebelumnya ...
+
+        // 7. HITUNG PROGRESS BUDGET (Baru)
+        // Ambil semua budget user
+        $budgets = \App\Models\Budget::where('user_id', $user->id)->with('category')->get();
+
+        $budgetProgress = $budgets->map(function ($budget) use ($user, $currentMonth, $currentYear) {
+            // Hitung total pengeluaran untuk kategori ini di bulan ini
+            $spent = Transaction::where('user_id', $user->id)
+                ->where('category_id', $budget->category_id)
+                ->where('type', 'expense')
+                ->whereMonth('transaction_date', $currentMonth)
+                ->whereYear('transaction_date', $currentYear)
+                ->sum('amount');
+
+            // Hitung persentase (max 100 biar grafik gak pecah, tapi kita simpan info overbudget)
+            $percentage = $budget->amount > 0 ? ($spent / $budget->amount) * 100 : 0;
+
+            return [
+                'category_name' => $budget->category->name,
+                'category_icon' => $budget->category->icon_name,
+                'limit' => $budget->amount,
+                'spent' => $spent,
+                'percentage' => $percentage,
+                'is_over' => $spent > $budget->amount // Flag jika overbudget
+            ];
+        });
+
         return Inertia::render('Dashboard', [
+            // ... data lama ...
             'wallets' => $wallets,
             'categories' => $categories,
             'transactions' => $transactions,
@@ -73,6 +102,9 @@ class WalletController extends Controller
             'monthlyExpense' => $monthlyExpense,
             'chartLabels' => $chartLabels,
             'chartData' => $chartData,
+
+            // Data Baru:
+            'budgetProgress' => $budgetProgress,
         ]);
     }
 

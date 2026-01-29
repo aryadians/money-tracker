@@ -7,6 +7,7 @@ use App\Http\Controllers\TransactionController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\TransferController;
+use App\Http\Controllers\BudgetController;
 
 /*
 |--------------------------------------------------------------------------
@@ -53,6 +54,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Route Export Excel
     Route::get('/transactions/export', [TransactionController::class, 'export'])
         ->name('transactions.export');
+    Route::resource('budgets', BudgetController::class)->only(['index', 'store', 'update', 'destroy']);
 });
 
 // --- 3. AUTENTIKASI ---
