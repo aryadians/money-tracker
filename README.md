@@ -1,89 +1,136 @@
 <div align="center">
-  <img src="https://raw.githubusercontent.com/aryadians/money-tracker/main/public/logo.svg" alt="Money Tracker" width="100"/>
+  <a href="https://github.com/aryadians/money-tracker">
+    <img src="https://raw.githubusercontent.com/aryadians/money-tracker/main/public/logo.svg" alt="Logo Money Tracker" width="120" height="120">
+  </a>
+
+  <h1 align="center">Money Tracker</h1>
+
+  <p align="center">
+    <b>A modern, open-source personal finance tracker.</b><br>
+    Take control of your money, your way.
+  </p>
+
+  <p align="center">
+    <a href="https://github.com/aryadians/money-tracker/actions">
+      <img src="https://img.shields.io/github/actions/workflow/status/aryadians/money-tracker/tests.yml?branch=main&label=tests&style=flat-square" alt="Tests">
+    </a>
+    <a href="https://github.com/aryadians/money-tracker/graphs/contributors">
+      <img src="https://img.shields.io/github/contributors/aryadians/money-tracker?style=flat-square" alt="Contributors">
+    </a>
+    <a href="https://github.com/aryadians/money-tracker/stargazers">
+      <img src="https://img.shields.io/github/stars/aryadians/money-tracker?style=flat-square" alt="Stars">
+    </a>
+    <a href="https://github.com/aryadians/money-tracker/blob/main/LICENSE">
+      <img src="https://img.shields.io/github/license/aryadians/money-tracker?style=flat-square" alt="License">
+    </a>
+  </p>
 </div>
 
-# 💰 Money Tracker
+---
 
-A modern, open-source personal finance tracker. Take control of your money, your way.
+## 🌟 About The Project
 
-[![PHP](https://img.shields.io/badge/PHP-8.2-777BB4?style=flat-square&logo=php&logoColor=white)](https://www.php.net)
-[![Laravel](https://img.shields.io/badge/Laravel-12.x-FF2D20?style=flat-square&logo=laravel&logoColor=white)](https://laravel.com)
-[![React](https://img.shields.io/badge/React-18.x-20232A?style=flat-square&logo=react&logoColor=61DAFB)](https://react.dev)
-[![Vite](https://img.shields.io/badge/Vite-7.x-646CFF?style=flat-square&logo=vite&logoColor=white)](https://vitejs.dev)
-[![MySQL](https://img.shields.io/badge/MySQL-8.0-4479A1?style=flat-square&logo=mysql&logoColor=white)](https://www.mysql.com)
-[![License](https://img.shields.io/github/license/aryadians/money-tracker?style=flat-square&color=5D6975)](LICENSE)
+**Money Tracker** is a full-stack personal finance application designed to help you track income, expenses, and transfers across multiple wallets. Built with performance and user experience in mind, it leverages the power of the **TALL** stack ecosystem (Tailwind, Alpine/React, Laravel, Livewire/Inertia).
 
+### ✨ Core Features
 
-## ✨ Core Features
+- 🏦 **Multi-Wallet Management**: Create and manage unlimited accounts (Cash, Bank, E-Wallet).
+- 📊 **Transaction Tracking**: Log income, expenses, and transfers seamlessly.
+- 🎯 **Budgeting Tools**: Set monthly limits and visualize your spending progress.
+- 🏷️ **Smart Categorization**: Organize transactions with custom icons and colors.
+- 📈 **Real-time Analytics**: Interactive charts to visualize your financial health.
+- 📤 **Data Export**: Easily export your transaction history to Excel/CSV.
 
--   **🏦 Multi-Wallet Management**: Handle all your accounts from one place.
--   **📊 Transaction Tracking**: Log income, expenses, and transfers seamlessly.
--   **🎯 Budgeting Tools**: Set monthly or yearly budgets and track your progress.
--   **🏷️ Smart Categorization**: Organize your spending with customizable categories.
--   **📈 Insightful Analytics**: Visualize your financial health with interactive charts.
--   **📤 Data Export**: Export your transaction data to Excel.
+---
 
 ## 🛠️ Tech Stack
 
-| Area      | Technology                                                                                                                              |
-| :-------- | :-------------------------------------------------------------------------------------------------------------------------------------- |
-| **Backend** | [PHP 8.2](https://www.php.net), [Laravel 12](https://laravel.com), [MySQL 8.0](https://www.mysql.com)                                    |
-| **Frontend**  | [React 18](https://react.dev), [Inertia.js](https://inertiajs.com), [Vite](https://vitejs.dev), [Tailwind CSS](https://tailwindcss.com)   |
-| **Tooling**   | [Composer](https://getcomposer.org), [NPM](https://www.npmjs.com), [Git](https://git-scm.com/)                                         |
+This project is built using the latest web technologies to ensure robustness and scalability.
 
+<div align="center">
+
+| **Backend** | **Frontend** | **Tools** |
+|:---:|:---:|:---:|
+| ![PHP](https://img.shields.io/badge/PHP-8.2-777BB4?style=for-the-badge&logo=php&logoColor=white) | ![React](https://img.shields.io/badge/React-18.x-61DAFB?style=for-the-badge&logo=react&logoColor=black) | ![Vite](https://img.shields.io/badge/Vite-6.x-646CFF?style=for-the-badge&logo=vite&logoColor=white) |
+| ![Laravel](https://img.shields.io/badge/Laravel-11.x-FF2D20?style=for-the-badge&logo=laravel&logoColor=white) | ![Inertia.js](https://img.shields.io/badge/Inertia.js-2.0-9553E9?style=for-the-badge&logo=inertia&logoColor=white) | ![Composer](https://img.shields.io/badge/Composer-2.x-885630?style=for-the-badge&logo=composer&logoColor=white) |
+| ![MySQL](https://img.shields.io/badge/MySQL-8.0-4479A1?style=for-the-badge&logo=mysql&logoColor=white) | ![Tailwind CSS](https://img.shields.io/badge/Tailwind-3.4-38B2AC?style=for-the-badge&logo=tailwindcss&logoColor=white) | ![Git](https://img.shields.io/badge/Git-2.x-F05032?style=for-the-badge&logo=git&logoColor=white) |
+
+</div>
+
+---
 
 ## 🚀 Getting Started
 
+Follow these steps to set up the project locally on your machine.
+
 ### Prerequisites
--   PHP >= 8.2
--   Node.js & NPM
--   Composer
--   MySQL
+
+Ensure you have the following installed:
+* **PHP** >= 8.2
+* **Node.js** & **NPM**
+* **Composer**
+* **MySQL**
 
 ### Installation
 
 1.  **Clone the repository**
     ```sh
-    git clone https://github.com/aryadians/money-tracker.git
+    git clone [https://github.com/aryadians/money-tracker.git](https://github.com/aryadians/money-tracker.git)
     cd money-tracker
     ```
 
-2.  **Install dependencies**
+2.  **Install PHP & Node dependencies**
     ```sh
-    composer install && npm install
+    composer install
+    npm install
     ```
 
-3.  **Setup your environment**
+3.  **Configure Environment**
+    Copy the example env file and update your database credentials.
     ```sh
     cp .env.example .env
     ```
-    *Then, update your database credentials in the `.env` file.*
+    *Open `.env` and set `DB_DATABASE`, `DB_USERNAME`, and `DB_PASSWORD`.*
 
-4.  **Generate application key & run migrations**
+4.  **Generate App Key & Run Migrations**
     ```sh
     php artisan key:generate
-    php artisan migrate
+    php artisan migrate --seed
     ```
 
-5.  **Build assets and start the servers**
+5.  **Run the Application**
+    You need two terminals running:
     ```sh
-    # Run the asset build process and local server
-    npm run dev 
-    
-    # In a new terminal, run the PHP server
+    # Terminal 1: Start Vite (Frontend)
+    npm run dev
+    ```
+    ```sh
+    # Terminal 2: Start Laravel Server (Backend)
     php artisan serve
     ```
-    Your app will be available at `http://localhost:8000`.
+
+    Visit `http://localhost:8000` in your browser.
+
+---
 
 ## 🤝 Contributing
 
-Contributions, issues, and feature requests are welcome! Feel free to check the [issues page](https://github.com/aryadians/money-tracker/issues).
+Contributions are what make the open-source community such an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated**.
+
+1.  Fork the Project
+2.  Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
+3.  Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
+4.  Push to the Branch (`git push origin feature/AmazingFeature`)
+5.  Open a Pull Request
+
+---
 
 ## 📝 License
 
-This project is open-source, licensed under the **MIT License**. See the `LICENSE` file for more details.
+Distributed under the **MIT License**. See `LICENSE` for more information.
 
 ---
+
 <p align="center">
   Made with ❤️ by <a href="https://github.com/aryadians">aryadians</a>
 </p>
