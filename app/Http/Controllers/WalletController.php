@@ -8,20 +8,21 @@ use App\Models\Wallet;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Services\HealthScoreService;
+use App\Services\AchievementService;
+use App\Services\InsightService;
 
 class WalletController extends Controller
 {
-    /**
-     * Menampilkan halaman Dashboard.
-     */
     public function index()
     {
         $user = Auth::user();
         $currentMonth = date('m');
         $currentYear = date('Y');
 
-        // --- SKOR KESEHATAN KEUANGAN ---
+        // --- SKOR KESEHATAN & ACHIEVEMENT ---
         $healthScore = HealthScoreService::calculate($user);
+        $achievements = AchievementService::checkAndUnlock($user); // Cek lencana baru
+        $insights = InsightService::generate($user); // Buat insight personal
 
         // 1. Ambil Data Dompet
         $wallets = Wallet::where('user_id', $user->id)->get();
@@ -111,6 +112,8 @@ class WalletController extends Controller
             // Data Baru (Lazy):
             'budgetProgress' => Inertia::lazy(fn () => $budgetProgress),
             'healthScore' => $healthScore, // Skor Kesehatan
+            'newAchievements' => $achievements, // Lencana baru (pop-up)
+            'insights' => $insights, // Tips keuangan
         ]);
     }
 

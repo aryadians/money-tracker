@@ -12,7 +12,10 @@ const CreateTransferModal = lazy(() => import('@/Pages/Transfers/Partials/Create
 const CreateBudgetModal = lazy(() => import('@/Pages/Budgets/Partials/CreateBudgetModal'));
 const EditBudgetModal = lazy(() => import('@/Pages/Budgets/Partials/EditBudgetModal'));
 
-function Dashboard({ auth, wallets, categories, transactions, totalBalance, monthlyIncome, monthlyExpense, chartLabels, chartData, budgetProgress, healthScore }) {
+import AchievementPopup from '@/Components/AchievementPopup';
+import OnboardingTour from '@/Components/OnboardingTour';
+
+function Dashboard({ auth, wallets, categories, transactions, totalBalance, monthlyIncome, monthlyExpense, chartLabels, chartData, budgetProgress, healthScore, newAchievements, insights }) {
 
     // --- STATE ---
     const [showCreateWallet, setShowCreateWallet] = useState(false);
@@ -60,6 +63,9 @@ function Dashboard({ auth, wallets, categories, transactions, totalBalance, mont
 
             <div className="min-h-screen bg-[#0B0F19] text-white relative overflow-hidden font-sans selection:bg-purple-500 selection:text-white">
 
+                <OnboardingTour />
+                <AchievementPopup achievements={newAchievements} />
+
                 {/* --- AMBIENT BACKGROUND --- */}
                 <div className="fixed inset-0 w-full h-full overflow-hidden pointer-events-none">
                     <div className="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] bg-purple-600/20 rounded-full mix-blend-screen filter blur-[100px] animate-pulse-slow"></div>
@@ -96,7 +102,28 @@ function Dashboard({ auth, wallets, categories, transactions, totalBalance, mont
                             </button>
                         </div>
                     </div>
-                    
+
+                    {/* --- SMART INSIGHTS --- */}
+                    {insights && insights.length > 0 && (
+                        <div className="mb-8 grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {insights.map((insight, idx) => (
+                                <div key={idx} className={`p-4 rounded-2xl border flex items-start gap-3 shadow-lg backdrop-blur-md ${
+                                    insight.type === 'warning' ? 'bg-yellow-500/10 border-yellow-500/30 text-yellow-200' :
+                                    insight.type === 'danger' ? 'bg-red-500/10 border-red-500/30 text-red-200' :
+                                    'bg-green-500/10 border-green-500/30 text-green-200'
+                                }`}>
+                                    <span className="text-xl mt-0.5">
+                                        {insight.type === 'warning' ? '⚠️' : insight.type === 'danger' ? '🚨' : '💡'}
+                                    </span>
+                                    <div>
+                                        <h4 className="font-bold text-sm uppercase tracking-wide opacity-70 mb-1">Smart Insight</h4>
+                                        <p className="text-sm font-medium leading-relaxed">{insight.message}</p>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+
                     {/* --- HEALTH SCORE & CALENDAR LINK --- */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
                         {/* Health Score Card */}
