@@ -12,7 +12,7 @@ const CreateTransferModal = lazy(() => import('@/Pages/Transfers/Partials/Create
 const CreateBudgetModal = lazy(() => import('@/Pages/Budgets/Partials/CreateBudgetModal'));
 const EditBudgetModal = lazy(() => import('@/Pages/Budgets/Partials/EditBudgetModal'));
 
-function Dashboard({ auth, wallets, categories, transactions, totalBalance, monthlyIncome, monthlyExpense, chartLabels, chartData, budgetProgress }) {
+function Dashboard({ auth, wallets, categories, transactions, totalBalance, monthlyIncome, monthlyExpense, chartLabels, chartData, budgetProgress, healthScore }) {
 
     // --- STATE ---
     const [showCreateWallet, setShowCreateWallet] = useState(false);
@@ -95,6 +95,52 @@ function Dashboard({ auth, wallets, categories, transactions, totalBalance, mont
                                 <span>📝</span> Transaksi Baru
                             </button>
                         </div>
+                    </div>
+                    
+                    {/* --- HEALTH SCORE & CALENDAR LINK --- */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                        {/* Health Score Card */}
+                        <div className="bg-gray-800 p-6 rounded-3xl border border-white/5 flex items-center justify-between relative overflow-hidden group">
+                            <div className="absolute top-0 right-0 w-32 h-32 bg-green-500/10 rounded-full blur-2xl"></div>
+                            <div>
+                                <h3 className="text-gray-400 font-bold text-xs uppercase tracking-widest mb-1">Skor Kesehatan Keuangan</h3>
+                                <div className="text-4xl font-black text-white flex items-baseline gap-1">
+                                    {healthScore || 0}<span className="text-lg text-gray-500 font-medium">/100</span>
+                                </div>
+                                <p className="text-xs text-gray-500 mt-2 max-w-[200px]">
+                                    {healthScore >= 80 ? 'Luar Biasa! Pertahankan kebiasaan baikmu. 🌟' : 
+                                     healthScore >= 50 ? 'Cukup Baik. Kurangi pengeluaran boros ya. 👍' : 
+                                     'Perlu Perhatian. Ayo mulai menabung & lunasi hutang! ⚠️'}
+                                </p>
+                            </div>
+                            <div className="relative w-20 h-20 flex items-center justify-center">
+                                <div className="absolute inset-0 flex items-center justify-center text-2xl animate-pulse-slow">🩺</div>
+                                <svg className="transform -rotate-90 w-20 h-20">
+                                    <circle cx="40" cy="40" r="36" stroke="#374151" strokeWidth="8" fill="transparent" />
+                                    <circle cx="40" cy="40" r="36" stroke={healthScore >= 80 ? '#22c55e' : healthScore >= 50 ? '#eab308' : '#ef4444'} 
+                                        strokeWidth="8" 
+                                        fill="transparent" 
+                                        strokeDasharray={226} 
+                                        strokeDashoffset={226 - (226 * (healthScore || 0)) / 100} 
+                                        strokeLinecap="round" 
+                                        className="transition-all duration-1000 ease-out"
+                                    />
+                                </svg>
+                            </div>
+                        </div>
+
+                        {/* Calendar Link Card */}
+                        <Link href={route('calendar.index')} className="bg-gray-800 p-6 rounded-3xl border border-white/5 flex items-center justify-between hover:border-blue-500/50 transition-all group cursor-pointer relative overflow-hidden">
+                            <div className="absolute -left-10 -bottom-10 w-40 h-40 bg-blue-500/10 rounded-full blur-3xl group-hover:bg-blue-500/20 transition-colors"></div>
+                            <div>
+                                <h3 className="text-blue-400 font-bold text-xs uppercase tracking-widest mb-1">Kalender Keuangan</h3>
+                                <div className="text-2xl font-bold text-white mb-1">Lihat Pola Cashflow</div>
+                                <p className="text-xs text-gray-500">Analisis pengeluaran harianmu dalam tampilan kalender.</p>
+                            </div>
+                            <div className="w-12 h-12 rounded-2xl bg-gray-900 flex items-center justify-center text-2xl group-hover:scale-110 transition-transform shadow-lg border border-white/5">
+                                📅
+                            </div>
+                        </Link>
                     </div>
 
                     {/* --- SECTION 1: STATS GRID --- */}

@@ -7,7 +7,7 @@ use App\Models\Transaction;
 use App\Models\Wallet;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Inertia\Inertia;
+use App\Services\HealthScoreService;
 
 class WalletController extends Controller
 {
@@ -19,6 +19,9 @@ class WalletController extends Controller
         $user = Auth::user();
         $currentMonth = date('m');
         $currentYear = date('Y');
+
+        // --- SKOR KESEHATAN KEUANGAN ---
+        $healthScore = HealthScoreService::calculate($user);
 
         // 1. Ambil Data Dompet
         $wallets = Wallet::where('user_id', $user->id)->get();
@@ -107,6 +110,7 @@ class WalletController extends Controller
 
             // Data Baru (Lazy):
             'budgetProgress' => Inertia::lazy(fn () => $budgetProgress),
+            'healthScore' => $healthScore, // Skor Kesehatan
         ]);
     }
 

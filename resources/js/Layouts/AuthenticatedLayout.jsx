@@ -47,6 +47,39 @@ export default function AuthenticatedLayout({ header, children }) {
                                 >
                                     Dashboard
                                 </NavLink>
+                                <NavLink
+                                    href={route('debts.index')}
+                                    active={route().current('debts.*')}
+                                    prefetch
+                                    className={`inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium leading-5 transition duration-150 ease-in-out focus:outline-none ${route().current('debts.*')
+                                        ? 'border-blue-500 text-white'
+                                        : 'border-transparent text-gray-400 hover:text-gray-200 hover:border-gray-600'
+                                        }`}
+                                >
+                                    Hutang
+                                </NavLink>
+                                <NavLink
+                                    href={route('saving-goals.index')}
+                                    active={route().current('saving-goals.*')}
+                                    prefetch
+                                    className={`inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium leading-5 transition duration-150 ease-in-out focus:outline-none ${route().current('saving-goals.*')
+                                        ? 'border-blue-500 text-white'
+                                        : 'border-transparent text-gray-400 hover:text-gray-200 hover:border-gray-600'
+                                        }`}
+                                >
+                                    Tabungan
+                                </NavLink>
+                                <NavLink
+                                    href={route('recurring.index')}
+                                    active={route().current('recurring.*')}
+                                    prefetch
+                                    className={`inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium leading-5 transition duration-150 ease-in-out focus:outline-none ${route().current('recurring.*')
+                                        ? 'border-blue-500 text-white'
+                                        : 'border-transparent text-gray-400 hover:text-gray-200 hover:border-gray-600'
+                                        }`}
+                                >
+                                    Rutin
+                                </NavLink>
                             </div>
                         </div>
 
@@ -166,6 +199,36 @@ export default function AuthenticatedLayout({ header, children }) {
                                 }`}
                         >
                             Dashboard
+                        </ResponsiveNavLink>
+                        <ResponsiveNavLink
+                            href={route('debts.index')}
+                            active={route().current('debts.*')}
+                            className={`block w-full ps-3 pe-4 py-2 border-l-4 text-start text-base font-medium transition duration-150 ease-in-out ${route().current('debts.*')
+                                ? 'border-blue-500 text-white bg-blue-500/10'
+                                : 'border-transparent text-gray-400 hover:text-gray-200 hover:bg-gray-800 hover:border-gray-600'
+                                }`}
+                        >
+                            Hutang
+                        </ResponsiveNavLink>
+                        <ResponsiveNavLink
+                            href={route('saving-goals.index')}
+                            active={route().current('saving-goals.*')}
+                            className={`block w-full ps-3 pe-4 py-2 border-l-4 text-start text-base font-medium transition duration-150 ease-in-out ${route().current('saving-goals.*')
+                                ? 'border-blue-500 text-white bg-blue-500/10'
+                                : 'border-transparent text-gray-400 hover:text-gray-200 hover:bg-gray-800 hover:border-gray-600'
+                                }`}
+                        >
+                            Tabungan
+                        </ResponsiveNavLink>
+                        <ResponsiveNavLink
+                            href={route('recurring.index')}
+                            active={route().current('recurring.*')}
+                            className={`block w-full ps-3 pe-4 py-2 border-l-4 text-start text-base font-medium transition duration-150 ease-in-out ${route().current('recurring.*')
+                                ? 'border-blue-500 text-white bg-blue-500/10'
+                                : 'border-transparent text-gray-400 hover:text-gray-200 hover:bg-gray-800 hover:border-gray-600'
+                                }`}
+                        >
+                            Rutin
                         </ResponsiveNavLink>
                     </div>
 

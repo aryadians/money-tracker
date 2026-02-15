@@ -3,6 +3,7 @@ import Modal from '@/Components/Modal';
 import InputLabel from '@/Components/InputLabel';
 import TextInput from '@/Components/TextInput';
 import { useState, useEffect } from 'react';
+import { createWorker } from 'tesseract.js';
 
 // Tambah prop 'transactionToEdit'
 export default function CreateTransactionModal({ show, onClose, wallets, categories, onCreateCategory, transactionToEdit = null }) {
@@ -19,6 +20,45 @@ export default function CreateTransactionModal({ show, onClose, wallets, categor
     });
 
     const [previewImage, setPreviewImage] = useState(null);
+    const [isScanning, setIsScanning] = useState(false);
+
+    // Fungsi OCR Scan Struk
+    const handleScanReceipt = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        setIsScanning(true);
+        setData('receipt', file);
+        if (file) setPreviewImage(URL.createObjectURL(file));
+
+        try {
+            const worker = await createWorker('eng');
+            const ret = await worker.recognize(file);
+            const text = ret.data.text;
+            
+            // Regex sederhana untuk mencari Total Harga
+            const numbers = text.match(/[\d,.]+/g);
+            if (numbers) {
+                const validNumbers = numbers
+                    .map(n => parseFloat(n.replace(/[,.]/g, '')))
+                    .filter(n => !isNaN(n) && n > 1000);
+
+                if (validNumbers.length > 0) {
+                    const maxAmount = Math.max(...validNumbers);
+                    setData(d => ({ ...d, amount: maxAmount, notes: 'Auto-scan: ' + maxAmount }));
+                    alert(`Struk terdeteksi! Total: ${maxAmount}`);
+                } else {
+                    alert('Gagal mendeteksi total harga otomatis.');
+                }
+            }
+            await worker.terminate();
+        } catch (err) {
+            console.error(err);
+            alert('Gagal memproses gambar struk.');
+        } finally {
+            setIsScanning(false);
+        }
+    };
 
     // Filter kategori sesuai tipe
     const filteredCategories = categories.filter(c => c.type === data.type);
@@ -98,6 +138,21 @@ export default function CreateTransactionModal({ show, onClose, wallets, categor
                     </div>
                     <button onClick={onClose} className="text-gray-500 hover:text-white">✕</button>
                 </div>
+
+                {/* --- OCR SCAN BUTTON --- */}
+                {!transactionToEdit && (
+                    <label className={`block w-full mb-5 text-center p-3 border-2 border-dashed rounded-xl cursor-pointer transition-all ${isScanning ? 'border-blue-500 bg-blue-500/10' : 'border-gray-700 bg-gray-800 hover:border-gray-500'}`}>
+                        {isScanning ? (
+                            <span className="text-xs font-bold text-blue-400 animate-pulse">🤖 Sedang Membaca Struk...</span>
+                        ) : (
+                            <div className="flex flex-col items-center">
+                                <span className="text-lg">📸</span>
+                                <span className="text-[10px] text-gray-400 mt-1 font-bold uppercase tracking-wider">Scan Struk Otomatis (Beta)</span>
+                            </div>
+                        )}
+                        <input type="file" accept="image/*" className="hidden" onChange={handleScanReceipt} disabled={isScanning} />
+                    </label>
+                )}
 
                 <form onSubmit={submit} className="space-y-5">
 

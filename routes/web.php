@@ -13,6 +13,7 @@ use App\Http\Controllers\SavingGoalController;
 use App\Http\Controllers\RecurringTransactionController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\ImportController;
+use App\Http\Controllers\CalendarController;
 
 /*
 |--------------------------------------------------------------------------
@@ -62,6 +63,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->name('transactions.pdf');
     Route::post('/transactions/import', [ImportController::class, 'store'])
         ->name('transactions.import');
+
+    // Calendar & Analytics
+    Route::get('/calendar', [CalendarController::class, 'index'])
+        ->name('calendar.index');
     Route::resource('budgets', BudgetController::class)->only(['index', 'store', 'update', 'destroy']);
 
     // F. Fitur Lanjutan
