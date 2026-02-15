@@ -66,20 +66,22 @@ class WalletController extends Controller
 
         // ... kode chart sebelumnya ...
 
-        // 7. HITUNG PROGRESS BUDGET (Baru)
-        // Ambil semua budget user
+        // 7. HITUNG PROGRESS BUDGET (Optimized)
         $budgets = \App\Models\Budget::where('user_id', $user->id)->with('category')->get();
+        
+        // Fetch all spent amounts for this month for all relevant categories in one query
+        $categoryIds = $budgets->pluck('category_id');
+        $spentAmounts = Transaction::where('user_id', $user->id)
+            ->whereIn('category_id', $categoryIds)
+            ->where('type', 'expense')
+            ->whereMonth('transaction_date', $currentMonth)
+            ->whereYear('transaction_date', $currentYear)
+            ->groupBy('category_id')
+            ->selectRaw('category_id, sum(amount) as total')
+            ->pluck('total', 'category_id');
 
-        $budgetProgress = $budgets->map(function ($budget) use ($user, $currentMonth, $currentYear) {
-            // Hitung total pengeluaran untuk kategori ini di bulan ini
-            $spent = Transaction::where('user_id', $user->id)
-                ->where('category_id', $budget->category_id)
-                ->where('type', 'expense')
-                ->whereMonth('transaction_date', $currentMonth)
-                ->whereYear('transaction_date', $currentYear)
-                ->sum('amount');
-
-            // Hitung persentase (max 100 biar grafik gak pecah, tapi kita simpan info overbudget)
+        $budgetProgress = $budgets->map(function ($budget) use ($spentAmounts) {
+            $spent = $spentAmounts[$budget->category_id] ?? 0;
             $percentage = $budget->amount > 0 ? ($spent / $budget->amount) * 100 : 0;
 
             return [
@@ -87,9 +89,9 @@ class WalletController extends Controller
                 'category_name' => $budget->category->name,
                 'category_icon' => $budget->category->icon_name,
                 'limit' => $budget->amount,
-                'spent' => $spent,
+                'spent' => (float)$spent,
                 'percentage' => $percentage,
-                'is_over' => $spent > $budget->amount // Flag jika overbudget
+                'is_over' => $spent > $budget->amount
             ];
         });
 

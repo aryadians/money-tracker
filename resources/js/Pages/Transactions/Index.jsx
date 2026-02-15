@@ -1,9 +1,11 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import CreateTransactionModal from '@/Pages/Transactions/Partials/CreateTransactionModal';
 import { Head, Link, router } from '@inertiajs/react';
-import { useState } from 'react';
+import { useState, lazy, Suspense } from 'react';
 
-export default function Index({ auth, transactions, filters, wallets, categories }) {
+// Lazy load modal
+const CreateTransactionModal = lazy(() => import('@/Pages/Transactions/Partials/CreateTransactionModal'));
+
+function Index({ auth, transactions, filters, wallets, categories }) {
 
     // --- STATE MANAGEMENT ---
     const [showModal, setShowModal] = useState(false);
@@ -37,7 +39,7 @@ export default function Index({ auth, transactions, filters, wallets, categories
     };
 
     return (
-        <AuthenticatedLayout user={auth.user} header={null}>
+        <>
             <Head title="Riwayat Transaksi" />
 
             <div className="min-h-screen bg-gray-900 text-white relative overflow-hidden pb-20">
@@ -197,16 +199,32 @@ export default function Index({ auth, transactions, filters, wallets, categories
                 </div>
 
                 {/* --- MODAL EDIT (Hidden by default) --- */}
-                <CreateTransactionModal
-                    show={showModal}
-                    onClose={() => { setShowModal(false); setEditingTransaction(null); }}
-                    wallets={wallets}
-                    categories={categories}
-                    transactionToEdit={editingTransaction}
-                />
+                <Suspense fallback={null}>
+                    <CreateTransactionModal
+                        show={showModal}
+                        onClose={() => { setShowModal(false); setEditingTransaction(null); }}
+                        wallets={wallets}
+                        categories={categories}
+                        transactionToEdit={editingTransaction}
+                    />
+                </Suspense>
 
-                <style>{` .animate-blob { animation: blob 7s infinite; } `}</style>
-            </div>
-        </AuthenticatedLayout>
-    );
-}
+                                <style>{` .animate-blob { animation: blob 7s infinite; } `}</style>
+
+                            </div>
+
+                        </>
+
+                    );
+
+                }
+
+                
+
+                Index.layout = (page) => <AuthenticatedLayout header={null}>{page}</AuthenticatedLayout>;
+
+                
+
+                export default Index;
+
+                

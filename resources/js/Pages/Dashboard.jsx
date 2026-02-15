@@ -1,16 +1,18 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import CreateWalletModal from '@/Pages/Wallets/Partials/CreateWalletModal';
-import CreateTransactionModal from '@/Pages/Transactions/Partials/CreateTransactionModal';
-import CreateCategoryModal from '@/Pages/Categories/Partials/CreateCategoryModal';
-import CreateTransferModal from '@/Pages/Transfers/Partials/CreateTransferModal';
-import CreateBudgetModal from '@/Pages/Budgets/Partials/CreateBudgetModal';
-import EditBudgetModal from '@/Pages/Budgets/Partials/EditBudgetModal'; // Import EditBudgetModal
 import BudgetCard from '@/Components/BudgetCard';
 import ExpenseChart from '@/Components/ExpenseChart';
 import { Head, Link, router } from '@inertiajs/react'; // Import router for delete
-import { useState } from 'react';
+import { useState, lazy, Suspense } from 'react';
 
-export default function Dashboard({ auth, wallets, categories, transactions, totalBalance, monthlyIncome, monthlyExpense, chartLabels, chartData, budgetProgress }) {
+// Lazy load modals
+const CreateWalletModal = lazy(() => import('@/Pages/Wallets/Partials/CreateWalletModal'));
+const CreateTransactionModal = lazy(() => import('@/Pages/Transactions/Partials/CreateTransactionModal'));
+const CreateCategoryModal = lazy(() => import('@/Pages/Categories/Partials/CreateCategoryModal'));
+const CreateTransferModal = lazy(() => import('@/Pages/Transfers/Partials/CreateTransferModal'));
+const CreateBudgetModal = lazy(() => import('@/Pages/Budgets/Partials/CreateBudgetModal'));
+const EditBudgetModal = lazy(() => import('@/Pages/Budgets/Partials/EditBudgetModal'));
+
+function Dashboard({ auth, wallets, categories, transactions, totalBalance, monthlyIncome, monthlyExpense, chartLabels, chartData, budgetProgress }) {
 
     // --- STATE ---
     const [showCreateWallet, setShowCreateWallet] = useState(false);
@@ -48,7 +50,7 @@ export default function Dashboard({ auth, wallets, categories, transactions, tot
     };
 
     return (
-        <AuthenticatedLayout user={auth.user} header={null}>
+        <>
             <Head title="Dashboard" />
 
             <div className="min-h-screen bg-[#0B0F19] text-white relative overflow-hidden font-sans selection:bg-purple-500 selection:text-white">
@@ -312,14 +314,29 @@ export default function Dashboard({ auth, wallets, categories, transactions, tot
             </div>
 
             {/* --- MODALS --- */}
-            <CreateWalletModal show={showCreateWallet} onClose={() => { setShowCreateWallet(false); setTimeout(() => setEditingWallet(null), 300); }} walletToEdit={editingWallet} />
-            <CreateCategoryModal show={showCreateCategory} onClose={() => setShowCreateCategory(false)} />
-            <CreateTransactionModal show={showCreateTransaction} onClose={() => setShowCreateTransaction(false)} wallets={safeWallets} categories={safeCategories} onCreateCategory={() => { setShowCreateTransaction(false); setTimeout(() => setShowCreateCategory(true), 200); }} />
-            <CreateTransferModal show={showCreateTransfer} onClose={() => setShowCreateTransfer(false)} wallets={safeWallets} />
-            <CreateBudgetModal show={showCreateBudget} onClose={() => setShowCreateBudget(false)} categories={safeCategories} />
-            <EditBudgetModal show={showEditBudget} onClose={() => { setShowEditBudget(false); setEditingBudget(null); }} budget={editingBudget} />
+            <Suspense fallback={null}>
+                <CreateWalletModal show={showCreateWallet} onClose={() => { setShowCreateWallet(false); setTimeout(() => setEditingWallet(null), 300); }} walletToEdit={editingWallet} />
+                <CreateCategoryModal show={showCreateCategory} onClose={() => setShowCreateCategory(false)} />
+                <CreateTransactionModal show={showCreateTransaction} onClose={() => setShowCreateTransaction(false)} wallets={safeWallets} categories={safeCategories} onCreateCategory={() => { setShowCreateTransaction(false); setTimeout(() => setShowCreateCategory(true), 200); }} />
+                <CreateTransferModal show={showCreateTransfer} onClose={() => setShowCreateTransfer(false)} wallets={safeWallets} />
+                <CreateBudgetModal show={showCreateBudget} onClose={() => setShowCreateBudget(false)} categories={safeCategories} />
+                <EditBudgetModal show={showEditBudget} onClose={() => { setShowEditBudget(false); setEditingBudget(null); }} budget={editingBudget} />
+            </Suspense>
 
-            <style>{` .animate-pulse-slow { animation: pulse 8s cubic-bezier(0.4, 0, 0.6, 1) infinite; } .custom-scrollbar::-webkit-scrollbar { width: 3px; } .custom-scrollbar::-webkit-scrollbar-thumb { background: #374151; border-radius: 10px; } `}</style>
-        </AuthenticatedLayout>
-    );
-}
+                        <style>{` .animate-pulse-slow { animation: pulse 8s cubic-bezier(0.4, 0, 0.6, 1) infinite; } .custom-scrollbar::-webkit-scrollbar { width: 3px; } .custom-scrollbar::-webkit-scrollbar-thumb { background: #374151; border-radius: 10px; } `}</style>
+
+                    </>
+
+                );
+
+            }
+
+            
+
+            Dashboard.layout = (page) => <AuthenticatedLayout header={null}>{page}</AuthenticatedLayout>;
+
+            
+
+            export default Dashboard;
+
+            
