@@ -7,6 +7,7 @@ use App\Models\Transaction;
 use App\Models\Wallet;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Inertia\Inertia;
 use App\Services\HealthScoreService;
 use App\Services\AchievementService;
 use App\Services\InsightService;
@@ -102,18 +103,16 @@ class WalletController extends Controller
         return Inertia::render('Dashboard', [
             'wallets' => $wallets,
             'categories' => $categories,
-            'transactions' => Inertia::lazy(fn () => $transactions),
+            'transactions' => $transactions,
             'totalBalance' => $wallets->sum('balance'),
             'monthlyIncome' => $monthlyIncome,
             'monthlyExpense' => $monthlyExpense,
             'chartLabels' => $chartLabels,
             'chartData' => $chartData,
-
-            // Data Baru (Lazy):
-            'budgetProgress' => Inertia::lazy(fn () => $budgetProgress),
-            'healthScore' => $healthScore, // Skor Kesehatan
-            'newAchievements' => $achievements, // Lencana baru (pop-up)
-            'insights' => $insights, // Tips keuangan
+            'budgetProgress' => $budgetProgress,
+            'healthScore' => $healthScore,
+            'newAchievements' => $achievements,
+            'insights' => $insights,
         ]);
     }
 
