@@ -36,16 +36,15 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/transfers', [TransferController::class, 'store'])->name('transfers.store');
 
     // B. Manajemen Dompet (Wallets)
-    Route::post('/wallets', [WalletController::class, 'store'])->name('wallets.store');       // Simpan Baru
-    Route::patch('/wallets/{wallet}', [WalletController::class, 'update'])->name('wallets.update'); // Update
-    Route::delete('/wallets/{wallet}', [WalletController::class, 'destroy'])->name('wallets.destroy'); // Hapus
+    Route::middleware('throttle:10,1')->group(function () {
+        Route::post('/wallets', [WalletController::class, 'store'])->name('wallets.store');
+        Route::patch('/wallets/{wallet}', [WalletController::class, 'update'])->name('wallets.update');
+        Route::post('/transfers', [TransferController::class, 'store'])->name('transfers.store');
+        Route::post('/transactions', [TransactionController::class, 'store'])->name('transactions.store');
+        Route::post('/categories', [CategoryController::class, 'store'])->name('categories.store');
+    });
 
-    // C. Manajemen Kategori (Categories)
-    Route::post('/categories', [CategoryController::class, 'store'])->name('categories.store'); // Simpan Baru
-
-    // D. Manajemen Transaksi (Transactions)
-    Route::get('/transactions', [TransactionController::class, 'index'])->name('transactions.index'); // Lihat Riwayat Lengkap
-    Route::post('/transactions', [TransactionController::class, 'store'])->name('transactions.store'); // Simpan Transaksi Baru
+    Route::delete('/wallets/{wallet}', [WalletController::class, 'destroy'])->name('wallets.destroy');
 
     // E. Profil User
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

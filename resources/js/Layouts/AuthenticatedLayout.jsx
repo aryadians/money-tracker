@@ -39,6 +39,7 @@ export default function AuthenticatedLayout({ header, children }) {
                                 <NavLink
                                     href={route('dashboard')}
                                     active={route().current('dashboard')}
+                                    prefetch
                                     className={`inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium leading-5 transition duration-150 ease-in-out focus:outline-none ${route().current('dashboard')
                                         ? 'border-blue-500 text-white'
                                         : 'border-transparent text-gray-400 hover:text-gray-200 hover:border-gray-600'

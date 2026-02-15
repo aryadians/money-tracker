@@ -314,7 +314,7 @@ function Dashboard({ auth, wallets, categories, transactions, totalBalance, mont
             </div>
 
             {/* --- MODALS --- */}
-            <Suspense fallback={null}>
+            <Suspense fallback={<div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"><div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div></div>}>
                 <CreateWalletModal show={showCreateWallet} onClose={() => { setShowCreateWallet(false); setTimeout(() => setEditingWallet(null), 300); }} walletToEdit={editingWallet} />
                 <CreateCategoryModal show={showCreateCategory} onClose={() => setShowCreateCategory(false)} />
                 <CreateTransactionModal show={showCreateTransaction} onClose={() => setShowCreateTransaction(false)} wallets={safeWallets} categories={safeCategories} onCreateCategory={() => { setShowCreateTransaction(false); setTimeout(() => setShowCreateCategory(true), 200); }} />
