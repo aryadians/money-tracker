@@ -12,6 +12,8 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use App\Exports\TransactionsExport;
 use Maatwebsite\Excel\Facades\Excel;
+use Intervention\Image\ImageManager;
+use Intervention\Image\Drivers\Gd\Driver;
 
 class TransactionController extends Controller
 {
@@ -70,10 +72,22 @@ class TransactionController extends Controller
         ]);
 
         DB::transaction(function () use ($request) {
-            // 1. Upload Gambar
+            // 1. Upload & Kompres Gambar
             $path = null;
             if ($request->hasFile('receipt')) {
-                $path = $request->file('receipt')->store('receipts', 'public');
+                $file = $request->file('receipt');
+                $filename = time() . '_' . $file->getClientOriginalName();
+                $path = 'receipts/' . $filename;
+
+                // Inisialisasi Image Manager dengan Driver GD
+                $manager = new ImageManager(new Driver());
+                $image = $manager->read($file);
+
+                // Resize jika terlalu lebar (maks 1200px) & Kompres Kualitas ke 70%
+                $image->scale(width: 1200);
+                
+                // Simpan ke storage public
+                Storage::disk('public')->put($path, (string) $image->encodeByMediaType('image/jpeg', quality: 70));
             }
 
             // 2. Simpan Transaksi
