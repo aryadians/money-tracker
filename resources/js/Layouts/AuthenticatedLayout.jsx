@@ -80,14 +80,14 @@ export default function AuthenticatedLayout({ header, children }) {
 
                                     <Dropdown.Content contentClasses="py-1 bg-gray-800 border border-white/10 shadow-xl rounded-md">
                                         <div className="px-4 py-2 text-xs text-gray-500 border-b border-white/5">
-                                            Manage Account
+                                            Kelola Akun
                                         </div>
 
                                         <Dropdown.Link
                                             href={route('profile.edit')}
                                             className="block w-full px-4 py-2 text-start text-sm leading-5 !text-gray-300 hover:bg-gray-700 hover:!text-white focus:outline-none transition duration-150 ease-in-out"
                                         >
-                                            Profile
+                                            Profil
                                         </Dropdown.Link>
 
                                         <div className="border-t border-white/5 my-1"></div>
@@ -98,7 +98,7 @@ export default function AuthenticatedLayout({ header, children }) {
                                             as="button"
                                             className="block w-full px-4 py-2 text-start text-sm leading-5 !text-red-400 hover:bg-gray-700 hover:!text-red-300 focus:outline-none transition duration-150 ease-in-out"
                                         >
-                                            Log Out
+                                            Keluar
                                         </Dropdown.Link>
                                     </Dropdown.Content>
                                 </Dropdown>
@@ -184,7 +184,7 @@ export default function AuthenticatedLayout({ header, children }) {
                                 href={route('profile.edit')}
                                 className="block w-full ps-3 pe-4 py-2 border-l-4 border-transparent text-start text-base font-medium text-gray-400 hover:text-gray-200 hover:bg-gray-800 hover:border-gray-600 transition duration-150 ease-in-out"
                             >
-                                Profile
+                                Profil
                             </ResponsiveNavLink>
                             <ResponsiveNavLink
                                 method="post"
@@ -192,7 +192,7 @@ export default function AuthenticatedLayout({ header, children }) {
                                 as="button"
                                 className="block w-full ps-3 pe-4 py-2 border-l-4 border-transparent text-start text-base font-medium text-red-400 hover:text-red-300 hover:bg-gray-800 hover:border-red-600 transition duration-150 ease-in-out"
                             >
-                                Log Out
+                                Keluar
                             </ResponsiveNavLink>
                         </div>
                     </div>

@@ -96,18 +96,17 @@ class WalletController extends Controller
         });
 
         return Inertia::render('Dashboard', [
-            // ... data lama ...
             'wallets' => $wallets,
             'categories' => $categories,
-            'transactions' => $transactions,
+            'transactions' => Inertia::lazy(fn () => $transactions),
             'totalBalance' => $wallets->sum('balance'),
             'monthlyIncome' => $monthlyIncome,
             'monthlyExpense' => $monthlyExpense,
             'chartLabels' => $chartLabels,
             'chartData' => $chartData,
 
-            // Data Baru:
-            'budgetProgress' => $budgetProgress,
+            // Data Baru (Lazy):
+            'budgetProgress' => Inertia::lazy(fn () => $budgetProgress),
         ]);
     }
 

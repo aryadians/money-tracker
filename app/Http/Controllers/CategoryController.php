@@ -24,6 +24,6 @@ class CategoryController extends Controller
             'color_hex' => '#cccccc', // Default
         ]);
 
-        return redirect()->back(); // Tetap di halaman yang sama
+        return redirect()->back()->with('message', 'Kategori baru berhasil ditambahkan!');
     }
 }

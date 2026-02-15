@@ -2,7 +2,7 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import BudgetCard from '@/Components/BudgetCard';
 import ExpenseChart from '@/Components/ExpenseChart';
 import { Head, Link, router } from '@inertiajs/react'; // Import router for delete
-import { useState, lazy, Suspense } from 'react';
+import { useState, lazy, Suspense, useEffect } from 'react';
 
 // Lazy load modals
 const CreateWalletModal = lazy(() => import('@/Pages/Wallets/Partials/CreateWalletModal'));
@@ -26,6 +26,11 @@ function Dashboard({ auth, wallets, categories, transactions, totalBalance, mont
     const [editingBudget, setEditingBudget] = useState(null);
 
     const [editingWallet, setEditingWallet] = useState(null);
+
+    // --- LAZY DATA FETCHING ---
+    useEffect(() => {
+        router.reload({ only: ['transactions', 'budgetProgress'] });
+    }, []);
 
     // --- DATA HANDLING ---
     const safeWallets = Array.isArray(wallets) ? wallets : [];
@@ -323,7 +328,18 @@ function Dashboard({ auth, wallets, categories, transactions, totalBalance, mont
                 <EditBudgetModal show={showEditBudget} onClose={() => { setShowEditBudget(false); setEditingBudget(null); }} budget={editingBudget} />
             </Suspense>
 
-                        <style>{` .animate-pulse-slow { animation: pulse 8s cubic-bezier(0.4, 0, 0.6, 1) infinite; } .custom-scrollbar::-webkit-scrollbar { width: 3px; } .custom-scrollbar::-webkit-scrollbar-thumb { background: #374151; border-radius: 10px; } `}</style>
+                        <style>{`
+                .animate-pulse-slow { animation: pulse 8s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+                .custom-scrollbar::-webkit-scrollbar { width: 3px; }
+                .custom-scrollbar::-webkit-scrollbar-thumb { background: #374151; border-radius: 10px; }
+                
+                /* Global Scrollbar & Selection */
+                ::-webkit-scrollbar { width: 6px; }
+                ::-webkit-scrollbar-track { background: #0B0F19; }
+                ::-webkit-scrollbar-thumb { background: #1F2937; border-radius: 10px; }
+                ::-webkit-scrollbar-thumb:hover { background: #374151; }
+                ::selection { background: #8B5CF6; color: white; }
+            `}</style>
 
                     </>
 
