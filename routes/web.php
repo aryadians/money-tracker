@@ -8,6 +8,11 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\TransferController;
 use App\Http\Controllers\BudgetController;
+use App\Http\Controllers\DebtController;
+use App\Http\Controllers\SavingGoalController;
+use App\Http\Controllers\RecurringTransactionController;
+use App\Http\Controllers\ReportController;
+use App\Http\Controllers\ImportController;
 
 /*
 |--------------------------------------------------------------------------
@@ -50,10 +55,19 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
-    // Route Export Excel
+    // Route Export Excel & PDF
     Route::get('/transactions/export', [TransactionController::class, 'export'])
         ->name('transactions.export');
+    Route::get('/transactions/pdf', [ReportController::class, 'downloadPdf'])
+        ->name('transactions.pdf');
+    Route::post('/transactions/import', [ImportController::class, 'store'])
+        ->name('transactions.import');
     Route::resource('budgets', BudgetController::class)->only(['index', 'store', 'update', 'destroy']);
+
+    // F. Fitur Lanjutan
+    Route::resource('debts', DebtController::class);
+    Route::resource('saving-goals', SavingGoalController::class);
+    Route::resource('recurring', RecurringTransactionController::class);
 });
 
 // --- 3. AUTENTIKASI ---

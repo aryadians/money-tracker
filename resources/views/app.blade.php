@@ -6,6 +6,14 @@
 
         <title inertia>{{ config('app.name', 'Money Tracker') }}</title>
 
+        <!-- SEO & Open Graph -->
+        <meta name="description" content="Kelola keuangan pribadi jadi lebih ringan, cepat, dan aman dengan Money Tracker.">
+        <meta property="og:title" content="Money Tracker - Smart Financial Management">
+        <meta property="og:description" content="Catat pemasukan dan pengeluaran Anda dengan antarmuka modern dan performa super cepat.">
+        <meta property="og:type" content="website">
+        <meta property="og:image" content="/logo.svg">
+        <meta name="theme-color" content="#0B0F19">
+
         <link rel="dns-prefetch" href="//fonts.bunny.net">
         <link rel="preconnect" href="https://fonts.bunny.net" crossorigin>
         <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />

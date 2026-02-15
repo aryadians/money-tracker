@@ -24,17 +24,28 @@ class TransactionController extends Controller
     {
         $user = Auth::user();
 
-        // Ambil Bulan & Tahun dari request (Default: Bulan ini)
+        // Ambil Filter dari request
         $month = $request->input('month', date('m'));
         $year = $request->input('year', date('Y'));
+        $search = $request->input('search');
 
-        // 1. Ambil Data Transaksi (Filter & Pagination)
+        // 1. Ambil Data Transaksi (Filter, Search & Pagination)
         $transactions = Transaction::where('user_id', $user->id)
-            ->with(['category', 'wallet']) // Load relasi
-            ->whereMonth('transaction_date', $month)
-            ->whereYear('transaction_date', $year)
+            ->with(['category', 'wallet'])
+            ->when($search, function ($query, $search) {
+                $query->where(function ($q) use ($search) {
+                    $q->where('description', 'like', "%{$search}%")
+                      ->orWhereHas('category', function ($cat) use ($search) {
+                          $cat->where('name', 'like', "%{$search}%");
+                      });
+                });
+            })
+            ->when(!$search, function ($query) use ($month, $year) {
+                $query->whereMonth('transaction_date', $month)
+                      ->whereYear('transaction_date', $year);
+            })
             ->latest('transaction_date')
-            ->paginate(10)
+            ->paginate(15)
             ->withQueryString();
 
         // 2. Ambil Data Dompet (Untuk Modal Edit di halaman Index)
@@ -50,9 +61,10 @@ class TransactionController extends Controller
             'filters' => [
                 'month' => $month,
                 'year' => $year,
+                'search' => $search,
             ],
-            'wallets' => $wallets,       // Kirim ke Frontend
-            'categories' => $categories, // Kirim ke Frontend
+            'wallets' => $wallets,
+            'categories' => $categories,
         ]);
     }
 

@@ -1,6 +1,10 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import { Head, Link, router } from '@inertiajs/react';
+import { Head, Link, router, useForm } from '@inertiajs/react';
 import { useState, lazy, Suspense } from 'react';
+import Modal from '@/Components/Modal';
+import InputLabel from '@/Components/InputLabel';
+import PrimaryButton from '@/Components/PrimaryButton';
+import SecondaryButton from '@/Components/SecondaryButton';
 
 // Lazy load modal
 const CreateTransactionModal = lazy(() => import('@/Pages/Transactions/Partials/CreateTransactionModal'));
@@ -9,7 +13,13 @@ function Index({ auth, transactions, filters, wallets, categories }) {
 
     // --- STATE MANAGEMENT ---
     const [showModal, setShowModal] = useState(false);
+    const [showImportModal, setShowImportModal] = useState(false);
     const [editingTransaction, setEditingTransaction] = useState(null);
+
+    const importForm = useForm({
+        wallet_id: '',
+        file: null,
+    });
 
     // --- HELPER FUNCTIONS ---
     const formatRupiah = (number) => {
@@ -23,8 +33,17 @@ function Index({ auth, transactions, filters, wallets, categories }) {
     const handleMonthChange = (e) => {
         router.get(route('transactions.index'), {
             month: e.target.value,
-            year: filters.year
+            year: filters.year,
+            search: filters.search
         }, { preserveState: true });
+    };
+
+    const handleSearch = (e) => {
+        router.get(route('transactions.index'), {
+            month: filters.month,
+            year: filters.year,
+            search: e.target.value
+        }, { preserveState: true, replace: true });
     };
 
     const handleDelete = (id) => {
@@ -36,6 +55,16 @@ function Index({ auth, transactions, filters, wallets, categories }) {
     const handleEdit = (trx) => {
         setEditingTransaction(trx);
         setShowModal(true);
+    };
+
+    const submitImport = (e) => {
+        e.preventDefault();
+        importForm.post(route('transactions.import'), {
+            onSuccess: () => {
+                setShowImportModal(false);
+                importForm.reset();
+            }
+        });
     };
 
     return (
@@ -58,7 +87,20 @@ function Index({ auth, transactions, filters, wallets, categories }) {
                             Riwayat Transaksi
                         </h1>
 
-                        <div className="flex items-center gap-3 flex-wrap justify-center sm:justify-end">
+                        <div className="flex items-center gap-3 flex-wrap justify-center sm:justify-end w-full sm:w-auto">
+                            {/* 0. Input Pencarian */}
+                            <div className="relative w-full sm:w-64">
+                                <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500">🔍</span>
+                                <input
+                                    type="text"
+                                    placeholder="Cari transaksi..."
+                                    defaultValue={filters.search}
+                                    onBlur={handleSearch}
+                                    onKeyUp={(e) => e.key === 'Enter' && handleSearch(e)}
+                                    className="bg-gray-800 border border-gray-700 text-white text-sm rounded-xl focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5"
+                                />
+                            </div>
+
                             {/* 1. Filter Bulan */}
                             <select
                                 value={filters.month}
@@ -84,8 +126,24 @@ function Index({ auth, transactions, filters, wallets, categories }) {
                                 href={route('transactions.export', { month: filters.month, year: filters.year })}
                                 className="px-4 py-2.5 bg-green-600 hover:bg-green-500 rounded-xl text-sm font-bold text-white shadow-lg flex items-center gap-2 transition"
                             >
-                                <span>📊</span> <span className="hidden sm:inline">Export</span>
+                                <span>📊</span> <span className="hidden sm:inline">Excel</span>
                             </a>
+
+                            {/* 2.5 Tombol Export PDF */}
+                            <a
+                                href={route('transactions.pdf', { month: filters.month, year: filters.year })}
+                                className="px-4 py-2.5 bg-red-600 hover:bg-red-500 rounded-xl text-sm font-bold text-white shadow-lg flex items-center gap-2 transition"
+                            >
+                                <span>📄</span> <span className="hidden sm:inline">PDF</span>
+                            </a>
+
+                            {/* 2.7 Tombol Import CSV */}
+                            <button
+                                onClick={() => setShowImportModal(true)}
+                                className="px-4 py-2.5 bg-gray-700 hover:bg-gray-600 rounded-xl text-sm font-bold text-white shadow-lg flex items-center gap-2 transition"
+                            >
+                                <span>📥</span> <span className="hidden sm:inline">Impor</span>
+                            </button>
 
                             {/* 3. Tombol Kembali */}
                             <Link
@@ -208,6 +266,45 @@ function Index({ auth, transactions, filters, wallets, categories }) {
                         transactionToEdit={editingTransaction}
                     />
                 </Suspense>
+
+                {/* --- MODAL IMPORT --- */}
+                <Modal show={showImportModal} onClose={() => setShowImportModal(false)}>
+                    <form onSubmit={submitImport} className="p-8 bg-gray-800 text-white rounded-3xl">
+                        <h2 className="text-2xl font-bold mb-2">Impor Transaksi</h2>
+                        <p className="text-sm text-gray-400 mb-6">Unggah file CSV mutasi bank Anda. Format: Tanggal, Keterangan, Jumlah, Tipe.</p>
+
+                        <div className="space-y-5">
+                            <div>
+                                <InputLabel value="Dompet Tujuan" className="text-gray-400 mb-2" />
+                                <select 
+                                    className="w-full bg-gray-900 border-gray-700 rounded-xl text-white"
+                                    value={importForm.data.wallet_id}
+                                    onChange={e => importForm.setData('wallet_id', e.target.value)}
+                                    required
+                                >
+                                    <option value="">Pilih Dompet</option>
+                                    {wallets.map(w => <option key={w.id} value={w.id}>{w.name}</option>)}
+                                </select>
+                            </div>
+
+                            <div>
+                                <InputLabel value="File CSV" className="text-gray-400 mb-2" />
+                                <input 
+                                    type="file"
+                                    accept=".csv"
+                                    onChange={e => importForm.setData('file', e.target.files[0])}
+                                    className="w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-bold file:bg-blue-600 file:text-white hover:file:bg-blue-500"
+                                    required
+                                />
+                            </div>
+                        </div>
+
+                        <div className="mt-8 flex justify-end gap-3">
+                            <SecondaryButton onClick={() => setShowImportModal(false)}>Batal</SecondaryButton>
+                            <PrimaryButton disabled={importForm.processing}>Mulai Impor</PrimaryButton>
+                        </div>
+                    </form>
+                </Modal>
 
                                 <style>{` .animate-blob { animation: blob 7s infinite; } `}</style>
 
